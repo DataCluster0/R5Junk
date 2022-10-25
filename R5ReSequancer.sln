@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32929.385
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "R5ReSequancer", "R5ReSequancer\R5ReSequancer.vcxproj", "{CCF81D7B-5CDF-4E32-8A84-0CDE027E054A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CCF81D7B-5CDF-4E32-8A84-0CDE027E054A}.Debug|x64.ActiveCfg = Debug|x64
+		{CCF81D7B-5CDF-4E32-8A84-0CDE027E054A}.Debug|x64.Build.0 = Debug|x64
+		{CCF81D7B-5CDF-4E32-8A84-0CDE027E054A}.Debug|x86.ActiveCfg = Debug|Win32
+		{CCF81D7B-5CDF-4E32-8A84-0CDE027E054A}.Debug|x86.Build.0 = Debug|Win32
+		{CCF81D7B-5CDF-4E32-8A84-0CDE027E054A}.Release|x64.ActiveCfg = Release|x64
+		{CCF81D7B-5CDF-4E32-8A84-0CDE027E054A}.Release|x64.Build.0 = Release|x64
+		{CCF81D7B-5CDF-4E32-8A84-0CDE027E054A}.Release|x86.ActiveCfg = Release|Win32
+		{CCF81D7B-5CDF-4E32-8A84-0CDE027E054A}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0E7C8A6A-B16F-45EC-994B-7A10F92D93DD}
+	EndGlobalSection
+EndGlobal
