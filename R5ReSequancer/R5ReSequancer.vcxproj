@@ -106,6 +106,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <AdditionalIncludeDirectories>../include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -129,14 +130,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\include\Utils.cpp" />
     <ClCompile Include="R5ReSequancer.cpp" />
-    <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BinaryIO.h" />
-    <ClInclude Include="includes.h" />
+    <ClInclude Include="..\include\BinaryIO.h" />
+    <ClInclude Include="..\include\includes.h" />
+    <ClInclude Include="..\include\Utils.h" />
     <ClInclude Include="structs.h" />
-    <ClInclude Include="Utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
