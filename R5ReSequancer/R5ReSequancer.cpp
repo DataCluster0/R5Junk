@@ -1,12 +1,9 @@
-#include "includes.h"
-#include "BinaryIO.h"
-#include "Utils.h"
+#include <includes.h>
 #include "structs.h"
 
 using namespace std::filesystem;
 
 int main(int argc, char* argv[]) {
-
 	for (int i = 0; i < argc; i++)
 	{
 		auto tmpfilepath = std::string((const char*)argv[i]);
@@ -19,6 +16,20 @@ int main(int argc, char* argv[]) {
 		printf("========================\n");
 		printf("%s\n", filepath.filename().string().c_str());
 
+		char* pExtDataBuf = nullptr;
+		std::string extdatapath = Utils::ChangeExtension(tmpfilepath, "rseqdata");
+		size_t extinputsize = 0;
+		BinaryIO extreader;
+		if (FILE_EXISTS(extdatapath))
+		{
+			extinputsize = Utils::GetFileSize(extdatapath);
+			extreader.open(extdatapath, BinaryIOMode::Read);
+
+			pExtDataBuf = new char[extinputsize];
+			extreader.getReader()->read(pExtDataBuf, extinputsize);
+			extreader.seek(0, std::ios_base::_Seekbeg);
+		}
+
 		BinaryIO reader;
 		reader.open(tmpfilepath, BinaryIOMode::Read);
 
@@ -28,8 +39,9 @@ int main(int argc, char* argv[]) {
 		reader.getReader()->read(pDataBuf, inputsize);
 
 		reader.seek(0, std::ios_base::_Seekbeg);
+
 		auto seqdesc = reader.read<mstudioseqdesc_t>();
-		uint64_t seqdescoffset = reader.getPosition();
+		uint64_t seqdescoffset = reader.tell();
 
 		file->hdr = seqdesc;
 
@@ -56,7 +68,7 @@ int main(int argc, char* argv[]) {
 				for (int i = 0; i < seqdesc.numevents; i++)
 				{
 					reader.seek(seqdesc.eventindex + (i * sizeof(mstudioeventv54_t_v122)), std::ios_base::_Seekbeg);
-					uint64_t baseoffset = reader.getPosition();
+					uint64_t baseoffset = reader.tell();
 
 					auto v10 = reader.read<mstudioeventv54_t_v122>();
 					mstudioeventv54_t v7;
@@ -102,7 +114,7 @@ int main(int argc, char* argv[]) {
 				for (int i = 0; i < seqdesc.numactivitymodifiers; i++)
 				{
 					reader.seek(seqdesc.activitymodifierindex + (i * struct_size), std::ios_base::_Seekbeg);
-					uint64_t baseoffset = reader.getPosition();
+					uint64_t baseoffset = reader.tell();
 
 					auto activitymodifier = reader.read<mstudioactivitymodifierv53_t>();
 
@@ -131,7 +143,7 @@ int main(int argc, char* argv[]) {
 				ASEQ_Out_animdesc animdata;
 
 				reader.seek(file->blendgroups[i], std::ios_base::_Seekbeg);
-				uint64_t animdesc_offset = reader.getPosition();
+				uint64_t animdesc_offset = reader.tell();
 				auto animdesc_new = reader.read<mstudioanimdescv54_t_v121>();
 				mstudioanimdescv54_t animdesc;
 
@@ -193,19 +205,16 @@ int main(int argc, char* argv[]) {
 						reader.seek(animdesc_offset + animdesc.sectionindex, std::ios_base::_Seekbeg);
 						std::vector<mstudioanimsectionsv53_t> Sections;
 
-						uint64_t animindex_offset = reader.getPosition();
+						uint64_t animindex_offset = reader.tell();
 
 						for (int i = 0; i < sectionlength; i++)
 						{
 							auto section = reader.read<mstudioanimsectionsv54_t_v121>();
 
 							if (section.isExternal)
-							{
 								IsExternal = true;
-								continue;
-							}
 
-							animdata.sections.push_back({ section.animindex });
+							animdata.sections.push_back(section);
 						}
 
 						reader.seek(animdesc_offset + animdesc.animindex, std::ios_base::_Seekbeg);
@@ -220,13 +229,13 @@ int main(int argc, char* argv[]) {
 							for (int j = 0; j < (4 - (numbones % 4)) / 2; j++)
 								reader.read<char>();
 
-						uint64_t oldoffset = reader.getPosition();
+						uint64_t oldoffset = reader.tell();
 
 						size_t animdata_size = 0;
 						for (int j = 0; j < numbones; j++)
 						{
 							animflagarrayv54_t flag = animdata.flagarray[j];
-							auto startofanimheader = reader.getPosition();
+							auto startofanimheader = reader.tell();
 							animdata_size = +Read_mstudio_rle_anim_t(reader, flag);
 
 							reader.seek(startofanimheader, std::ios_base::_Seekbeg);
@@ -246,13 +255,13 @@ int main(int argc, char* argv[]) {
 							for (int j = 0; j < (4 - (numbones % 4)) / 2; j++)
 								reader.read<char>();
 
-						uint64_t oldoffset = reader.getPosition();
+						uint64_t oldoffset = reader.tell();
 
 						size_t animdata_size = 0;
 						for (int j = 0; j < numbones; j++)
 						{
 							animflagarrayv54_t flag = animdata.flagarray[j];
-							auto startofanimheader = reader.getPosition();
+							auto startofanimheader = reader.tell();
 							animdata_size = +Read_mstudio_rle_anim_t(reader, flag);
 
 							reader.seek(startofanimheader, std::ios_base::_Seekbeg);
@@ -274,7 +283,7 @@ int main(int argc, char* argv[]) {
 			if (IsExternal)
 				printf("%s -> external data detected...\n", filepath.filename().string().c_str());
 
-			if(IsSegmented)
+			if (IsSegmented)
 				printf("%s -> segmented data detected...\n", filepath.filename().string().c_str());
 
 			BinaryIO writer;
@@ -284,51 +293,17 @@ int main(int argc, char* argv[]) {
 			writer.open(outpath + filepath.filename().string(), BinaryIOMode::Write);
 
 			writer.getWriter()->write(pDataBuf, inputsize);
-
-			//if (file->posekeys.size())
-			//{
-			//	file->hdr.posekeyindex = writer.getPosition();
-			//	for (int i = 0; i < file->posekeys.size(); i++)
-			//		writer.write<float>(file->posekeys[i]);
-			//}
+			writer.seek(inputsize, std::ios_base::_Seekbeg);
+			writer.getWriter()->write(pExtDataBuf, extinputsize);
 
 			if (file->events.size())
 			{
 				writer.seek(file->hdr.eventindex, std::ios_base::_Seekbeg);
-				file->hdr.eventindex = writer.getPosition();
+				file->hdr.eventindex = writer.tell();
 				for (int i = 0; i < file->events.size(); i++)
 					writer.write<mstudioeventv54_t>(file->events[i].event);
-
-				//writer.seek(0, std::ios_base::_Seekend);
-				//for (int i = 0; i < file->events.size(); i++)
-				//	writer.writeString(file->events[i].string);
 			}
 
-			//if (file->activitymodifiers.size())
-			//{
-			//	file->hdr.activitymodifierindex = writer.getPosition();
-			//	for (int i = 0; i < file->activitymodifiers.size(); i++)
-			//		writer.write<mstudioactivitymodifierv53_t>(file->activitymodifiers[i].activitymodifier);
-			//
-			//	for (int i = 0; i < file->activitymodifiers.size(); i++)
-			//		writer.writeString(file->activitymodifiers[i].string);
-			//}
-
-			//if (file->autolayers.size())
-			//{
-			//	file->hdr.autolayerindex = writer.getPosition();
-			//	for (int i = 0; i < file->autolayers.size(); i++)
-			//		writer.write<mstudioautolayerv54_t>(file->autolayers[i]);
-			//}
-			//
-			//if (file->weightlist.size())
-			//{
-			//	file->hdr.weightlistindex = writer.getPosition();
-			//	for (int i = 0; i < file->weightlist.size(); i++)
-			//		writer.write<float>(file->weightlist[i]);
-			//}
-			//
-			//file->hdr.animindexindex = writer.getPosition();
 			if (file->animdescs.size())
 			{
 				uint64_t animdatasize = 0;
@@ -344,55 +319,34 @@ int main(int argc, char* argv[]) {
 
 					if (animdesc.sections.size())
 					{
-						reader.seek(offset + animdesc.desc.sectionindex, std::ios_base::_Seekbeg);
-						//animdesc.desc.sectionframes = (animdesc.desc.numframes - 1);
+						writer.seek(offset + animdesc.desc.sectionindex, std::ios_base::_Seekbeg);
 						for (int i = 0; i < animdesc.sections.size(); i++)
-							writer.write<mstudioanimsectionsv53_t>(animdesc.sections[i]);
+						{
+							auto section = animdesc.sections[i];
+
+							auto oldpos = writer.tell();
+							if (section.isExternal)
+							{
+								auto extanimoffset = inputsize + section.animindex;
+
+								section.animindex = extanimoffset - offset;
+							}
+								
+								
+							writer.write<int>(section.animindex);
+						}
 					}
 
 					writer.seek(offset, std::ios_base::_Seekbeg);
 					writer.write<mstudioanimdescv54_t>(animdesc.desc);
-
-					//for (int i = 0; i < animdesc.flagarray.size(); i++)
-					//	writer.write<animflagarrayv54_t>(animdesc.flagarray[i]);
-
-					// padding
-					//uint8_t padding = 0;
-					//writer.write<uint8_t>(padding);
-					//
-					//writer.write<char*>(animdesc.animationdata);
 				}
 			}
-			//
-			//if (file->blendgroups.size())
-			//{
-			//	file->hdr.animindexindex = writer.getPosition();
-			//	for (int i = 0; i < file->blendgroups.size(); i++)
-			//		writer.write<int>(file->blendgroups[i]);
-			//}
-			//
-			//file->hdr.szlabelindex = writer.getPosition();
-			//writer.writeString(file->szlabel);
-			//
-			//if (file->szactivity.length() > 0)
-			//{
-			//	file->hdr.szactivitynameindex = writer.getPosition();
-			//	writer.writeString(file->szactivity);
-			//}
 
-			//if (file->SectionData.size())
-			//{
-			//	//file->hdr.animindexindex = writer.getPosition();
-			//	for (int i = 0; i < file->SectionData.size(); i++)
-			//		writer.write<char*>(file->SectionData[i]);
-			//}
-			//
 			//// write new header data
 			writer.seek(0, std::ios_base::_Seekbeg);
 			writer.write<mstudioseqdesc_t>(file->hdr);
 
 			writer.close();
-
 		}
 	}
 

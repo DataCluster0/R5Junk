@@ -13,3 +13,7 @@
 #include <fstream>
 #include <cstdint>
 #include <stddef.h>
+
+
+#include "BinaryIO.h"
+#include "Utils.h"

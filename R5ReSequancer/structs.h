@@ -1,4 +1,4 @@
-#include "includes.h"
+#include <includes.h>
 
 struct Vector2
 {
@@ -472,7 +472,7 @@ struct ASEQ_Out_animdesc
 	mstudioanimdescv54_t desc;
 	std::vector<mstudioikrulev54_t> ikrules;
 	std::vector<animflagarrayv54_t> flagarray;
-	std::vector<mstudioanimsectionsv53_t> sections;
+	std::vector<mstudioanimsectionsv54_t_v121> sections;
 
 	char* animationdata;
 };

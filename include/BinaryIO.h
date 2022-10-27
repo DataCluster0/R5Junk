@@ -135,15 +135,6 @@ public:
 		return reader.eof();
 	}
 
-	unsigned __int64 getPosition() 
-	{ 
-		if(checkWritabilityStatus())
-		   return this->getWriter()->tellp();
-	    
-		if(checkReadabilityStatus())
-			return this->getReader()->tellg();
-	};
-
 	// Generic write method that will write any value to a file (except a string,
 	// for strings use writeString instead)
 	template <typename T>
@@ -189,7 +180,7 @@ public:
 		// find the length of the string.
 		size_t size = str.size();
 
-		uint64_t oldpos = this->getPosition();
+		uint64_t oldpos = this->tell();
 
 		writer.seekp(offset, std::ios_base::_Seekbeg);
 
@@ -260,6 +251,16 @@ public:
 				result += c;
 			}
 		}
+	}
+
+	size_t size()
+	{
+		uint64_t oldpos = this->tell();
+
+		this->seek(0, std::ios_base::_Seekend);
+		auto filesize = this->tell();
+		this->seek(oldpos, std::ios_base::_Seekbeg);
+		return filesize;
 	}
 
 	size_t tell()
