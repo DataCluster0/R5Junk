@@ -7,8 +7,9 @@ int main(int argc, char* argv[]) {
 	for (int i = 0; i < argc; i++)
 	{
 		auto tmpfilepath = std::string((const char*)argv[i]);
-		if (tmpfilepath.find(".rseq") == -1)
+		if (tmpfilepath.find(".rseq") == -1 || tmpfilepath.find(".rseqdata") != -1)
 			continue;
+
 		ASEQ_Out* file = new ASEQ_Out();
 
 		auto filepath = std::filesystem::path(tmpfilepath);
@@ -294,7 +295,15 @@ int main(int argc, char* argv[]) {
 
 			writer.getWriter()->write(pDataBuf, inputsize);
 			writer.seek(inputsize, std::ios_base::_Seekbeg);
-			writer.getWriter()->write(pExtDataBuf, extinputsize);
+
+			if(IsExternal)
+			   writer.getWriter()->write(pExtDataBuf, extinputsize);
+
+			if (IsExternal && !pExtDataBuf)
+			{
+				printf("%s -> .seqdata not found skipping...", filepath.filename().string().c_str());
+				continue;
+			}
 
 			if (file->events.size())
 			{
@@ -350,6 +359,6 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-	//system("pause");
+	system("pause");
 	return EXIT_SUCCESS;
 }
