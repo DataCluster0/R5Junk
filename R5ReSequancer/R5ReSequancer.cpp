@@ -1,9 +1,13 @@
 #include <includes.h>
+#include <Utils.h>
 #include "structs.h"
 
 using namespace std::filesystem;
 
 int main(int argc, char* argv[]) {
+	argv[0] = (char*)"H:\\GAMES\\R5pc_r5launch_N1094_CL456479_2019_10_30_05_20_PM\\R_Repositories\\R5Junk\\x64\\Debug\\ads_in.rseq";
+	argc = 1;
+
 	for (int i = 0; i < argc; i++)
 	{
 		auto tmpfilepath = std::string((const char*)argv[i]);
@@ -58,7 +62,7 @@ int main(int argc, char* argv[]) {
 			if (seqdesc.posekeyindex)
 			{
 				reader.seek(seqdesc.posekeyindex, std::ios_base::_Seekbeg);
-				for (int i = 0; i < seqdesc.numevents; i++)
+				for (int i = 0; i < posekeys; i++)
 					file->posekeys.push_back(reader.read<float>());
 			}
 
@@ -86,7 +90,8 @@ int main(int argc, char* argv[]) {
 
 					int strlen = szeventname.length() + 1;
 
-					v7.szeventindex = v10.szeventindex + (i * 4);
+					uint64_t nameoffset = (seqdesc.numevents * sizeof(mstudioeventv54_t)) + str_offset;
+					v7.szeventindex = nameoffset - (i * sizeof(mstudioeventv54_t));
 
 					file->events.push_back({ v7 , szeventname });
 					str_offset += strlen;
@@ -137,6 +142,12 @@ int main(int argc, char* argv[]) {
 					file->blendgroups.push_back(reader.read<int>());
 			}
 
+			reader.seek(seqdesc.szlabelindex, std::ios_base::_Seekbeg);
+			file->szlabel = reader.readString();
+
+			reader.seek(seqdesc.szactivitynameindex, std::ios_base::_Seekbeg);
+			file->szactivity = reader.readString();
+
 			uint64_t str_offset = 0;
 			for (int i = 0; i < numanims; i++)
 			{
@@ -153,12 +164,10 @@ int main(int argc, char* argv[]) {
 
 				animdata.desc = animdesc;
 
-				{
-					reader.seek(animdesc_offset + animdesc.sznameindex, std::ios_base::_Seekbeg);
-					std::string szname = reader.readString();
+				reader.seek(animdesc_offset + animdesc.sznameindex, std::ios_base::_Seekbeg);
+				animdata.name = reader.readString();
 
-					animdesc.sznameindex = +(sizeof(mstudioanimdescv54_t_v121) - sizeof(mstudioanimdescv54_t));
-				}
+				animdesc.sznameindex = +(sizeof(mstudioanimdescv54_t_v121) - sizeof(mstudioanimdescv54_t));
 
 				if (animdesc.numikrules)
 				{
@@ -214,69 +223,80 @@ int main(int argc, char* argv[]) {
 							if (section.isExternal)
 								IsExternal = true;
 
-							animdata.sections.push_back(section);
+							ASEQ_Out_section sectiondata;
+							sectiondata.data = section;
+
+							animdata.sections.push_back(sectiondata);
 						}
 
-						reader.seek(animdesc_offset + animdesc.animindex, std::ios_base::_Seekbeg);
-
-						for (int i = 0; i < numbones; i++)
+						for (auto& section : animdata.sections)
 						{
-							animflagarrayv54_t boneflag = reader.read<animflagarrayv54_t>();
-							animdata.flagarray.push_back(boneflag);
-						}
+							if (section.data.isExternal)
+							{
+								extreader.seek(section.data.animindex);
 
-						if (numbones % 4)
-							for (int j = 0; j < (4 - (numbones % 4)) / 2; j++)
-								reader.read<char>();
+								uint64_t boneflagpos = extreader.tell();
+								for (int i = 0; i < numbones; i++)
+								{
+									animflagarrayv54_t boneflag = extreader.read<animflagarrayv54_t>();
+									section.flagarray.push_back(boneflag);
+								}
 
-						uint64_t oldoffset = reader.tell();
+								reader.seek(boneflagpos + (numbones / 2));
+								for (int j = 0; j < numbones; j++)
+								{
+									animflagarrayv54_t boneflag = section.flagarray[j];
 
-						size_t animdata_size = 0;
-						for (int j = 0; j < numbones; j++)
-						{
-							animflagarrayv54_t flag = animdata.flagarray[j];
-							auto startofanimheader = reader.tell();
-							animdata_size = +Read_mstudio_rle_anim_t(reader, flag);
+									if (boneflag.FlagCount() > 0)
+										section.animdata.push_back(Read_mstudio_rle_anim_t(extreader, boneflag));
+								}
+							}
+							else
+							{
+								reader.seek(animdesc_offset + section.data.animindex, std::ios_base::_Seekbeg);
 
-							reader.seek(startofanimheader, std::ios_base::_Seekbeg);
+								uint64_t boneflagpos = reader.tell();
+								for (int i = 0; i < numbones; i++)
+								{
+									animflagarrayv54_t boneflag = reader.read<animflagarrayv54_t>();
+									section.flagarray.push_back(boneflag);
+								}
+
+								reader.seek(boneflagpos + (numbones / 2));
+								for (int j = 0; j < numbones; j++)
+								{
+									animflagarrayv54_t boneflag = section.flagarray[j];
+
+									if (boneflag.FlagCount() > 0)
+										section.animdata.push_back(Read_mstudio_rle_anim_t(reader, boneflag));
+								}
+							}
 						}
 					}
 					else
 					{
 						reader.seek(animdesc_offset + animdesc.animindex, std::ios_base::_Seekbeg);
 
+						uint64_t boneflagpos = reader.tell();
 						for (int i = 0; i < numbones; i++)
 						{
 							animflagarrayv54_t boneflag = reader.read<animflagarrayv54_t>();
 							animdata.flagarray.push_back(boneflag);
 						}
 
-						if (numbones % 4)
-							for (int j = 0; j < (4 - (numbones % 4)) / 2; j++)
-								reader.read<char>();
-
-						uint64_t oldoffset = reader.tell();
-
-						size_t animdata_size = 0;
+						reader.seek(boneflagpos + (numbones / 2));
 						for (int j = 0; j < numbones; j++)
 						{
-							animflagarrayv54_t flag = animdata.flagarray[j];
-							auto startofanimheader = reader.tell();
-							animdata_size = +Read_mstudio_rle_anim_t(reader, flag);
+							animflagarrayv54_t boneflag = animdata.flagarray[j];
 
-							reader.seek(startofanimheader, std::ios_base::_Seekbeg);
+							if (boneflag.FlagCount() > 0)
+								animdata.animdata.push_back(Read_mstudio_rle_anim_t(reader, boneflag));
 						}
 					}
 				}
 
 				file->animdescs.push_back(animdata);
 			}
-
-			reader.seek(seqdesc.szlabelindex, std::ios_base::_Seekbeg);
-			file->szlabel = reader.readString();
-
-			reader.seek(seqdesc.szactivitynameindex, std::ios_base::_Seekbeg);
-			file->szactivity = reader.readString();
 
 			reader.close();
 
@@ -292,64 +312,365 @@ int main(int argc, char* argv[]) {
 			std::filesystem::create_directory(outpath);
 			writer.open(outpath + filepath.filename().string(), BinaryIOMode::Write);
 
-			writer.getWriter()->write(pDataBuf, inputsize);
-			writer.seek(inputsize, std::ios_base::_Seekbeg);
-			writer.getWriter()->write(pExtDataBuf, extinputsize);
+			//writer.getWriter()->write(pDataBuf, inputsize);
+			//writer.seek(inputsize, std::ios_base::_Seekbeg);
+			//writer.getWriter()->write(pExtDataBuf, extinputsize);
+			writer.write<mstudioseqdesc_t>(file->hdr);
+
+			if (file->posekeys.size())
+			{
+				file->hdr.posekeyindex = writer.tell();
+				for (auto& posekey : file->posekeys)
+					writer.write<float>(posekey);
+			}
 
 			if (file->events.size())
 			{
-				writer.seek(file->hdr.eventindex, std::ios_base::_Seekbeg);
 				file->hdr.eventindex = writer.tell();
-				for (int i = 0; i < file->events.size(); i++)
-					writer.write<mstudioeventv54_t>(file->events[i].event);
+				for (auto& event : file->events)
+					writer.write<mstudioeventv54_t>(event.event);
 			}
 
+			if (file->weightlist.size())
+			{
+				file->hdr.weightlistindex = writer.tell();
+				for (auto& weight : file->weightlist)
+					writer.write<float>(weight);
+			}
+
+			file->hdr.activitymodifierindex = writer.tell();
+			if (file->activitymodifiers.size())
+			{
+				for (auto& actmod : file->activitymodifiers)
+					writer.write<mstudioactivitymodifierv53_t>(actmod.activitymodifier);
+
+				for (auto& actmod : file->activitymodifiers)
+					writer.writeString(actmod.string);
+			}
+
+			if (file->autolayers.size())
+			{
+				file->hdr.autolayerindex = writer.tell();
+				for (auto& autolayer : file->autolayers)
+					writer.write<mstudioautolayerv54_t>(autolayer);
+			}
+
+			// write blendgroup offsets first
+			if (file->blendgroups.size())
+			{
+				file->hdr.animindexindex = writer.tell();
+				int temp = 0;
+				for (auto& blend : file->blendgroups)
+					writer.write<int>(temp);
+			}
+
+			std::vector<int> newbodygroups;
 			if (file->animdescs.size())
 			{
 				uint64_t animdatasize = 0;
-				for (int i = 0; i < file->animdescs.size(); i++)
+
+				for (auto& animdesc : file->animdescs)
 				{
-					auto offset = file->blendgroups[i];
+					// set blendgroup data
+					uint64_t animdescpos = writer.tell();
+					newbodygroups.push_back(animdescpos);
 
-					auto animdesc = file->animdescs[i];
+					// prewrite header
+					writer.write<mstudioanimdescv54_t>(animdesc.desc);
 
-					writer.seek(offset + animdesc.desc.ikruleindex, std::ios_base::_Seekbeg);
-					for (int i = 0; i < animdesc.ikrules.size(); i++)
-						writer.write<mstudioikrulev54_t>(animdesc.ikrules[i]);
+					animdesc.desc.ikruleindex = writer.tell() - animdescpos; // ik rule offset
+					for (auto& ikrule : animdesc.ikrules)
+						writer.write<mstudioikrulev54_t>(ikrule);
+
+					uint64_t senctionpos = writer.tell();
 
 					if (animdesc.sections.size())
 					{
-						writer.seek(offset + animdesc.desc.sectionindex, std::ios_base::_Seekbeg);
-						for (int i = 0; i < animdesc.sections.size(); i++)
+						// keep old pos for later overwrite
+						uint64_t sectionpos = writer.tell();
+						animdesc.desc.sectionindex = sectionpos - animdescpos;
+						for (auto& section : animdesc.sections)
 						{
-							auto section = animdesc.sections[i];
+							int temp = 0;
+							writer.write<int>(temp);
+						}
 
-							auto oldpos = writer.tell();
-							if (section.isExternal)
+						for (auto& section : animdesc.sections)
+						{
+							uint64_t boneflagoffset = writer.tell();
+							
+							// write bone flag array
+							for (auto& boneflag : section.flagarray)
+								writer.write<animflagarrayv54_t>(boneflag);
+							
+							writer.seek(boneflagoffset + animdesc.flagarray.size());
+							int64_t animdataoffset = writer.tell();
+							
+							for (auto& data : section.animdata)
 							{
-								auto extanimoffset = inputsize + section.animindex;
+								auto headerpos = writer.tell();
+								writer.write<mstudio_rle_animv54_t>(data.hdr);
+							
+								if (data.hdr.STUDIO_ANIM_ANIMPOS_54)
+									writer.write<float>(data.posscale);
 
-								section.animindex = extanimoffset - offset;
+								uint64_t posoffset = 0;
+								if (data.boneflags.STUDIO_ANIM_ANIMPOS_54)
+								{
+									if (data.hdr.STUDIO_ANIM_ANIMPOS_54)
+									{
+										posoffset = writer.tell();
+										writer.write<mstudioanim_valueptrv54_t>(data.animpos);
+									}
+									else writer.write<uint32_t>(data.rawpos);
+								}
+
+								uint64_t rotoffset = 0;
+								if (data.boneflags.STUDIO_ANIM_ANIMROT_54)
+								{
+									if (data.hdr.STUDIO_ANIM_ANIMROT_54)
+									{
+										rotoffset = writer.tell();
+										writer.write<mstudioanim_valueptrv54_t>(data.animrot);
+									}
+									else writer.write<uint64_t>(data.rawrot);
+								}
+
+								uint64_t angleoffset = 0;
+								if (data.boneflags.STUDIO_ANIM_ANIMSCALE_54)
+								{
+									if (data.hdr.STUDIO_ANIM_ANIMSCALE_54)
+									{
+										angleoffset = writer.tell();
+										writer.write<mstudioanim_valueptrv54_t>(data.animscale);
+									}
+									else writer.write<uint32_t>(data.rawscale);
+								}
+
+								if (data.hdr.STUDIO_ANIM_ANIMPOS_54)
+								{
+									posoffset = writer.tell();
+									writer.write<mstudioanim_valueptrv54_t>(data.animpos);
+								}
+
+								if (data.hdr.STUDIO_ANIM_ANIMROT_54)
+								{
+									if (data.animrot.fields.offset)
+									{
+										data.animrot.fields.offset = (int32_t)(writer.tell() - rotoffset);
+										writer.write<mstudioanimvalue_t>(data.animvaluerot[0]);
+									}
+
+									if (data.animrot.fields.offset1)
+									{
+										data.animrot.fields.offset1 = (int32_t)(writer.tell() - rotoffset);
+										writer.write<mstudioanimvalue_t>(data.animvaluerot[1]);
+									}
+
+									if (data.animrot.fields.offset2)
+									{
+										data.animrot.fields.offset2 = (int32_t)(writer.tell() - rotoffset);
+										writer.write<mstudioanimvalue_t>(data.animvaluerot[2]);
+									}
+
+									uint64_t oldoffset = writer.tell();
+
+									writer.seek(rotoffset);
+									writer.write<mstudioanim_valueptrv54_t>(data.animrot);
+									writer.seek(oldoffset);
+								}
+							
+								uint64_t oldpos = writer.tell();
+							
+								writer.seek(headerpos);
+							
+								data.hdr.size = (uint16_t)(oldpos - headerpos);
+								writer.write<mstudio_rle_animv54_t>(data.hdr);
+							
+								writer.seek(oldpos);
 							}
-								
-								
-							writer.write<int>(section.animindex);
+							
+							animdesc.desc.animindex = boneflagoffset - animdescpos;
+						}
+
+						auto oldpos = writer.tell();
+						writer.seek(sectionpos);
+						for (auto& section : animdesc.sections)
+							writer.write<int>(section.data.animindex);
+
+						writer.seek(oldpos);
+					}
+					else if (animdesc.animdata.size())
+					{
+						uint64_t boneflagoffset = writer.tell();
+
+						// write bone flag array
+						for (auto& boneflag : animdesc.flagarray)
+							writer.write<animflagarrayv54_t>(boneflag);
+
+						writer.seek(boneflagoffset + (animdesc.flagarray.size() / 2));
+						int64_t animdataoffset = writer.tell();
+
+						for (auto& data : animdesc.animdata)
+						{
+							auto headerpos = writer.tell();
+							writer.write<mstudio_rle_animv54_t>(data.hdr);
+
+							if (data.hdr.STUDIO_ANIM_ANIMPOS_54)
+								writer.write<float>(data.posscale);
+
+							uint64_t posoffset = 0;
+							if (data.boneflags.STUDIO_ANIM_ANIMPOS_54)
+							{
+								if (data.hdr.STUDIO_ANIM_ANIMPOS_54)
+								{
+									posoffset = writer.tell();
+									writer.write<mstudioanim_valueptrv54_t>(data.animpos);
+								}
+								else writer.write<uint32_t>(data.rawpos);
+							}
+
+							uint64_t rotoffset = 0;
+							if (data.boneflags.STUDIO_ANIM_ANIMROT_54)
+							{
+								if (data.hdr.STUDIO_ANIM_ANIMROT_54)
+								{
+									rotoffset = writer.tell();
+									writer.write<mstudioanim_valueptrv54_t>(data.animrot);
+								}
+								else writer.write<uint64_t>(data.rawrot);
+							}
+
+							uint64_t angleoffset = 0;
+							if (data.boneflags.STUDIO_ANIM_ANIMSCALE_54)
+							{
+								if (data.hdr.STUDIO_ANIM_ANIMSCALE_54)
+								{
+									angleoffset = writer.tell();
+									writer.write<mstudioanim_valueptrv54_t>(data.animscale);
+								}
+								else writer.write<uint32_t>(data.rawscale);
+							}
+
+							if (data.hdr.STUDIO_ANIM_ANIMPOS_54)
+							{
+								posoffset = writer.tell();
+								writer.write<mstudioanim_valueptrv54_t>(data.animpos);
+							}
+
+							if (data.hdr.STUDIO_ANIM_ANIMROT_54)
+							{
+								if (data.animrot.fields.offset)
+								{
+									data.animrot.fields.offset = (int32_t)(writer.tell() - rotoffset);
+									writer.write<mstudioanimvalue_t>(data.animvaluerot[0]);
+								}
+
+								if (data.animrot.fields.offset1)
+								{
+									data.animrot.fields.offset1 = (int32_t)(writer.tell() - rotoffset);
+									writer.write<mstudioanimvalue_t>(data.animvaluerot[1]);
+								}
+
+								if (data.animrot.fields.offset2)
+								{
+									data.animrot.fields.offset2 = (int32_t)(writer.tell() - rotoffset);
+									writer.write<mstudioanimvalue_t>(data.animvaluerot[2]);
+								}
+
+								uint64_t oldoffset = writer.tell();
+
+								writer.seek(rotoffset);
+								writer.write<mstudioanim_valueptrv54_t>(data.animrot);
+								writer.seek(oldoffset);
+							}
+
+							animdesc.desc.animindex = boneflagoffset - animdescpos;
+
+							uint64_t oldpos = writer.tell();
+							data.hdr.size = (uint16_t)(oldpos - headerpos);
+							//
+							writer.seek(headerpos);
+							writer.write<mstudio_rle_animv54_t>(data.hdr);
+							writer.seek(oldpos);
 						}
 					}
 
-					writer.seek(offset, std::ios_base::_Seekbeg);
+					auto oldpos = writer.tell();
+
+					// write new animdesc header
+					writer.seek(animdescpos);
 					writer.write<mstudioanimdescv54_t>(animdesc.desc);
+					writer.seek(oldpos);
 				}
 			}
 
+			uint64_t oldpos = writer.tell();
+
+			// write new blendgroup data
+			if (newbodygroups.size())
+			{
+				writer.seek(file->hdr.animindexindex);
+				for (auto& blend : newbodygroups)
+					writer.write<int>(blend);
+			}
+
+			// return to old pos
+			writer.seek(oldpos);
+
+			file->hdr.szlabelindex = writer.tell();
+			writer.writeString(file->szlabel);
+
+			if (file->szactivity.length() > 0)
+			{
+				file->hdr.szactivitynameindex = writer.tell();
+				writer.writeString(file->szactivity);
+			}
+
+			uint64_t nameoffset = writer.tell();
+			if (file->events.size())
+			{
+				uint64_t oldpos = reader.tell();
+				for (int i = 0; i < file->events.size(); i++)
+				{
+					uint64_t animdesc_offset = file->hdr.eventindex + (i * sizeof(mstudioeventv54_t));
+					auto eventdesc = file->events[i];
+
+					eventdesc.event.szeventindex = writer.tell() - animdesc_offset;
+					writer.writeString(eventdesc.string);
+					nameoffset += eventdesc.string.length() + 1;
+
+					writer.seek(animdesc_offset);
+					writer.write<mstudioeventv54_t>(eventdesc.event);
+					writer.seek(nameoffset);
+				}
+			}
+
+			nameoffset = writer.tell();
+			for (int i = 0; i < newbodygroups.size(); i++)
+			{
+				uint64_t animdesc_offset = newbodygroups[i];
+				auto animdesc = file->animdescs[i];
+
+				animdesc.desc.sznameindex = writer.tell() - animdesc_offset;
+				writer.writeString(animdesc.name);
+				nameoffset += animdesc.name.length() + 1;
+
+				writer.seek(animdesc_offset);
+				writer.write<mstudioanimdescv54_t>(animdesc.desc);
+				writer.seek(nameoffset);
+			}
+
+			file->hdr.unkindex = file->hdr.szlabelindex;
+
 			//// write new header data
-			writer.seek(0, std::ios_base::_Seekbeg);
+			writer.seek(0);
 			writer.write<mstudioseqdesc_t>(file->hdr);
 
 			writer.close();
 		}
 	}
 
-	system("pause");
+	//system("pause");
 	return EXIT_SUCCESS;
 }

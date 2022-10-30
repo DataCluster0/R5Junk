@@ -1,85 +1,5 @@
+#pragma once
 #include <includes.h>
-
-struct Vector2
-{
-	float x, y;
-
-	Vector2(float x, float y) {
-		this->x = x;
-		this->y = y;
-	}
-
-	Vector2() {};
-};
-
-struct Vector3
-{
-	float x, y, z;
-
-	Vector3(float x, float y, float z) {
-		this->x = x;
-		this->y = y;
-		this->z = z;
-	}
-
-	Vector3() {};
-};
-
-struct Quaternion
-{
-	float x, y, z, w;
-
-	Quaternion(float x, float y, float z, float w) {
-		this->x = x;
-		this->y = y;
-		this->z = z;
-		this->w = w;
-	}
-
-	Quaternion() {};
-};
-
-// packed vector
-struct Vector32
-{
-	uint32_t x : 10;
-	uint32_t y : 10;
-	uint32_t z : 10;
-	uint32_t exp : 2;
-};
-
-struct Vector48
-{
-	int x : 2;
-	int y : 2;
-	int z : 2;
-};
-
-struct Quat32
-{
-	uint32_t x : 11;
-	uint32_t y : 10;
-	uint32_t z : 10;
-	uint32_t wneg : 1;
-};
-
-struct Quat48
-{
-	uint16_t x : 16;
-	uint16_t y : 16;
-	uint16_t z : 15; // broken
-	uint16_t wneg : 1;
-};
-
-struct Quat64
-{
-	uint64_t x : 21;
-	uint64_t y : 21;
-	uint64_t z : 21;
-	uint64_t wneg : 1;
-
-	//  <read=ReadShort(sqrt( 1 - x * x - y * y - z * z ))>
-};
 
 enum mstudioseqflags : uint32_t
 {
@@ -405,24 +325,61 @@ struct mstudioactivitymodifierv53_t
 	int unk; // 0 or 1 observed.
 };
 
-struct animflagarrayv54_t
+union mstudioanimvalue_t
 {
-	// don't think this is correct
-	uint8_t STUDIO_ANIM_POS_54 : 1;
-	uint8_t STUDIO_ANIM_ROT_54 : 1;
-	uint8_t STUDIO_ANIM_SCALE_54 : 1;
-	uint8_t STUDIO_ANIM_UNK_54 : 1;
+	struct
+	{
+		uint8_t	valid; // number of valid frames, or how many frames of data this value has
+		uint8_t	total; // total number of frames, aka "values"
+	} num;
+
+	short value; // actual value, value*posscale
 };
 
-struct mstudioanim_valueptrv54_t
+union mstudioanim_valueptrv54_t
 {
-	//int ok;
+	struct {
+		int32_t offset : 10;
+		int32_t offset1 : 5;
+		int32_t offset2 : 5;
+	} fields;
 
-	int test : 8;
-	int test3 : 3;
-	int test1 : 8;
-	int test5 : 3;
-	int test4 : 8;
+	uint32_t all_fields;
+
+	inline std::vector<mstudioanimvalue_t> ReadAnimValues(BinaryIO& reader, uint64_t baseoffset)
+	{
+		std::vector<mstudioanimvalue_t> data{};
+
+		data.resize(3);
+
+		uint64_t basepos = reader.tell();
+
+		if (fields.offset)
+		{
+			reader.seek(baseoffset + fields.offset);
+			data[0] = reader.read<mstudioanimvalue_t>();
+		}
+
+		uint64_t off0pos = reader.tell();
+
+		if (fields.offset1)
+		{
+			reader.seek(baseoffset + fields.offset1);
+			data[1] = reader.read<mstudioanimvalue_t>();
+		}
+
+		uint64_t off1pos = reader.tell();
+
+		if (fields.offset2)
+		{
+			reader.seek(baseoffset + fields.offset2);
+			data[2] = reader.read<mstudioanimvalue_t>();
+		}
+
+		uint64_t endpos = reader.tell();
+
+		return data;
+	}
 };
 
 // used for piecewise loading of animation data
@@ -443,17 +400,62 @@ struct mstudioanimsectionsv54_t_v121
 	int isExternal; // 0 or 1, if 1 section is not in rseq (I think)
 };
 
+enum STUDIO_ANIM_flags : uint16_t
+{
+	STUDIO_ANIM_DELTA_54 = 0x01, // unverified
+	STUDIO_ANIM_ANIMSCALE_54 = 0x02, // mstudioanim_valueptr_t
+	STUDIO_ANIM_ANIMROT_54 = 0x04, // mstudioanim_valueptr_t
+	STUDIO_ANIM_ANIMPOS_54 = 0x08 // mstudioanim_valueptr_t
+};
+
+struct animflagarrayv54_t
+{
+	int8_t STUDIO_ANIM_ANIMPOS_54 : 1;
+	int8_t STUDIO_ANIM_ANIMROT_54 : 1;
+	int8_t STUDIO_ANIM_ANIMSCALE_54 : 1;
+	int8_t STUDIO_ANIM_DELTA_54 : 1;
+
+	inline int FlagCount()
+	{
+		int flagcount = 0;
+
+		if (STUDIO_ANIM_ANIMPOS_54)
+			flagcount++;
+
+		if (STUDIO_ANIM_ANIMROT_54)
+			flagcount++;
+
+		if (STUDIO_ANIM_ANIMSCALE_54)
+			flagcount++;
+
+		return flagcount;
+	}
+};
 
 struct mstudio_rle_animv54_t
 {
-	uint16_t _tsize : 12; // total size of all animation data, not next offset because even the last one has it
-	uint16_t flags : 4;
-};
+	int16_t size : 12; // total size of all animation data, not next offset because even the last one has it
+	int8_t STUDIO_ANIM_ANIMPOS_54 : 1;
+	int8_t STUDIO_ANIM_ANIMROT_54 : 1;
+	int8_t STUDIO_ANIM_ANIMSCALE_54 : 1;
+	int8_t STUDIO_ANIM_DELTA_54 : 1;
 
-#define STUDIO_ANIM_DELTA_54	 0x01 // unverified
-#define STUDIO_ANIM_ANIMSCALE_54 0x02 // mstudioanim_valueptr_t
-#define STUDIO_ANIM_ANIMROT_54	 0x04 // mstudioanim_valueptr_t
-#define STUDIO_ANIM_ANIMPOS_54	 0x08 // mstudioanim_valueptr_t
+	inline int FlagCount()
+	{
+		int flagcount = 0;
+
+		if (STUDIO_ANIM_ANIMPOS_54)
+			flagcount++;
+
+		if (STUDIO_ANIM_ANIMROT_54)
+			flagcount++;
+
+		if (STUDIO_ANIM_ANIMSCALE_54)
+			flagcount++;
+
+		return flagcount;
+	}
+};
 
 struct ASEQ_Out_event
 {
@@ -467,15 +469,47 @@ struct ASEQ_Out_modifier
 	std::string string;
 };
 
+struct mstudio_rle_anim_t_OUT
+{
+	animflagarrayv54_t boneflags{};
+
+	mstudio_rle_animv54_t hdr{};
+	float posscale = 0;
+
+	mstudioanim_valueptrv54_t animpos{};
+	std::vector<mstudioanimvalue_t> animvaluepos{};
+	uint32_t rawpos{};
+
+	mstudioanim_valueptrv54_t animrot{};
+	std::vector<mstudioanimvalue_t> animvaluerot{};
+	uint64_t rawrot{};
+
+	mstudioanim_valueptrv54_t animscale{};
+	std::vector<mstudioanimvalue_t> animvaluescale{};
+	uint32_t rawscale{};
+
+	int size = 0;
+};
+
+struct ASEQ_Out_section
+{
+	std::vector<animflagarrayv54_t> flagarray;
+	mstudioanimsectionsv54_t_v121 data;
+	std::vector<mstudio_rle_anim_t_OUT> animdata;
+};
+
 struct ASEQ_Out_animdesc
 {
 	mstudioanimdescv54_t desc;
+	std::string name;
 	std::vector<mstudioikrulev54_t> ikrules;
 	std::vector<animflagarrayv54_t> flagarray;
-	std::vector<mstudioanimsectionsv54_t_v121> sections;
+	std::vector<ASEQ_Out_section> sections;
+	std::vector<mstudio_rle_anim_t_OUT> animdata;
 
 	char* animationdata;
 };
+
 
 struct ASEQ_Out
 {
@@ -498,40 +532,57 @@ struct ASEQ_Out
 	std::vector<int> blendgroups;
 };
 
-size_t Read_mstudio_rle_anim_t(BinaryIO& reader, animflagarrayv54_t boneflag)
+mstudio_rle_anim_t_OUT Read_mstudio_rle_anim_t(BinaryIO& reader, animflagarrayv54_t boneflag)
 {
-	size_t size = 0;
+	mstudio_rle_anim_t_OUT dataout;
+	dataout.boneflags = boneflag;
 
-	auto animv54 = reader.read<mstudio_rle_animv54_t>();
+	uint64_t basepos = reader.tell();
 
-	size += sizeof(mstudio_rle_animv54_t);
+	mstudio_rle_animv54_t datahdr = reader.read<mstudio_rle_animv54_t>();
 
-	if (animv54.flags & STUDIO_ANIM_ANIMPOS_54)
-		float posscale = reader.read<float>();
+	if (datahdr.STUDIO_ANIM_ANIMPOS_54)
+		float posscale;
 
-	if (boneflag.STUDIO_ANIM_POS_54)
+	if (boneflag.STUDIO_ANIM_ANIMPOS_54)
 	{
-		if (animv54.flags & STUDIO_ANIM_ANIMPOS_54)
-			auto animpos = reader.read<mstudioanim_valueptrv54_t>();
+		if (datahdr.STUDIO_ANIM_ANIMPOS_54)
+		{
+			uint64_t offset = reader.tell();
+			dataout.animpos = reader.read<mstudioanim_valueptrv54_t>();
+			dataout.animvaluepos = dataout.animpos.ReadAnimValues(reader, offset);
+		}
 		else
-			Vector48 rawpos = reader.read<Vector48>();
+			dataout.rawpos = reader.read<uint32_t>();
 	}
 
-	if (boneflag.STUDIO_ANIM_ROT_54)
+	if (boneflag.STUDIO_ANIM_ANIMROT_54)
 	{
-		if (animv54.flags & STUDIO_ANIM_ANIMROT_54)
-			auto animrot = reader.read<mstudioanim_valueptrv54_t>();
+		if (datahdr.STUDIO_ANIM_ANIMROT_54)
+		{
+			uint64_t offset = reader.tell();
+			dataout.animrot = reader.read<mstudioanim_valueptrv54_t>();
+			dataout.animvaluerot = dataout.animrot.ReadAnimValues(reader, offset);
+		}
 		else
-			Quat64 rawrot = reader.read<Quat64>();
+			dataout.rawrot = reader.read<uint64_t>();
 	}
 
-	if (boneflag.STUDIO_ANIM_SCALE_54)
+	if (boneflag.STUDIO_ANIM_ANIMSCALE_54)
 	{
-		if (animv54.flags & STUDIO_ANIM_ANIMSCALE_54)
-			auto animscale = reader.read<mstudioanim_valueptrv54_t>();
+		if (datahdr.STUDIO_ANIM_ANIMSCALE_54)
+		{
+			uint64_t offset = reader.tell();
+			dataout.animscale = reader.read<mstudioanim_valueptrv54_t>();
+			dataout.animvaluescale = dataout.animscale.ReadAnimValues(reader, offset);
+		}
 		else
-			Vector48 rawscale = reader.read<Vector48>();
+			dataout.rawscale = reader.read<uint32_t>();
 	}
 
-	return animv54._tsize;
+	dataout.hdr = datahdr;
+
+	reader.seek(basepos + datahdr.size);
+
+	return dataout;
 };

@@ -66,9 +66,7 @@ public:
 
 			writer.open(filePath.c_str(), std::ios::binary);
 			if (!writer.is_open())
-			{
 				currentMode = BinaryIOMode::None;
-			}
 		}
 		// Read mode
 		else if (mode == BinaryIOMode::Read)
@@ -80,9 +78,7 @@ public:
 
 			reader.open(filePath.c_str(), std::ios::binary);
 			if (!reader.is_open())
-			{
 				currentMode = BinaryIOMode::None;
-			}
 		}
 
 		// if the mode is still the NONE/initial one -> we failed
@@ -93,22 +89,16 @@ public:
 	void close()
 	{
 		if (currentMode == BinaryIOMode::Write)
-		{
 			writer.close();
-		}
 		else if (currentMode == BinaryIOMode::Read)
-		{
 			reader.close();
-		}
 	}
 
 	// checks whether we're allowed to write or not.
 	bool checkWritabilityStatus()
 	{
 		if (currentMode != BinaryIOMode::Write)
-		{
 			return false;
-		}
 		return true;
 	}
 
@@ -159,11 +149,9 @@ public:
 
 		// create char pointer from string.
 		char* text = (char*)(str.c_str());
-		// find the length of the string.
-		size_t size = str.size();
 
 		// write the whole string including the null.
-		writer.write((const char*)text, size);
+		writer.write((const char*)text, str.size());
 	}
 
 	void writeString(std::string str, uint64_t offset)
@@ -171,21 +159,12 @@ public:
 		if (!checkWritabilityStatus())
 			return;
 
-		// first add a \0 at the end of the string so we can detect
-		// the end of string when reading it
-		str += '\0';
-
-		// create char pointer from string.
-		char* text = (char*)(str.c_str());
-		// find the length of the string.
-		size_t size = str.size();
-
 		uint64_t oldpos = this->tell();
+		this->seek(offset, std::ios_base::_Seekbeg);
 
-		writer.seekp(offset, std::ios_base::_Seekbeg);
+		this->writeString(str);
 
-		// write the whole string including the null.
-		writer.write((const char*)text, size);
+		this->seek(oldpos, std::ios_base::_Seekbeg);
 	}
 
 	// reads any type of value except strings.

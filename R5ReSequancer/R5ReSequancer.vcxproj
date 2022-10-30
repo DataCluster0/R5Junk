@@ -121,6 +121,9 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>../include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -130,11 +133,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\include\Half.cpp" />
     <ClCompile Include="..\include\Utils.cpp" />
     <ClCompile Include="R5ReSequancer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\BinaryIO.h" />
+    <ClInclude Include="..\include\Half.h" />
     <ClInclude Include="..\include\includes.h" />
     <ClInclude Include="..\include\Utils.h" />
     <ClInclude Include="structs.h" />
