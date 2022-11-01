@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{ccf81d7b-5cdf-4e32-8a84-0cde027e054a}</ProjectGuid>
-    <RootNamespace>R5ReSequancer</RootNamespace>
+    <ProjectGuid>{b69b34b8-1c48-4a25-b190-f6e3b782fb80}</ProjectGuid>
+    <RootNamespace>R5Splinter</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -104,9 +104,9 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>../include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>../include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -121,6 +121,9 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>../include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -132,15 +135,19 @@
   <ItemGroup>
     <ClCompile Include="..\include\Quaternion.cpp" />
     <ClCompile Include="..\include\Utils.cpp" />
+    <ClCompile Include="..\include\Vector2.cpp" />
     <ClCompile Include="..\include\Vector3.cpp" />
-    <ClCompile Include="R5ReSequancer.cpp" />
+    <ClCompile Include="R5Splinter.cpp" />
+    <ClCompile Include="BoneMagic.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\BinaryIO.h" />
     <ClInclude Include="..\include\includes.h" />
     <ClInclude Include="..\include\Quaternion.h" />
     <ClInclude Include="..\include\Utils.h" />
+    <ClInclude Include="..\include\Vector2.h" />
     <ClInclude Include="..\include\Vector3.h" />
+    <ClInclude Include="BoneMagic.h" />
     <ClInclude Include="structs.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

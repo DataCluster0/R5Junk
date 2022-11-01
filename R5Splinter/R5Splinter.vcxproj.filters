@@ -14,20 +14,26 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
     <Filter Include="Header Files\math">
-      <UniqueIdentifier>{dc35bfaa-6bf4-45d0-a8ff-a213d64354c3}</UniqueIdentifier>
+      <UniqueIdentifier>{5887ec80-30df-4324-993a-94d4396511a6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="R5ReSequancer.cpp">
+    <ClCompile Include="R5Splinter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BoneMagic.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\include\Utils.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\include\Vector3.cpp">
-      <Filter>Header Files\math</Filter>
+      <Filter>Header Files</Filter>
     </ClCompile>
     <ClCompile Include="..\include\Quaternion.cpp">
+      <Filter>Header Files\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\Vector2.cpp">
+      <Filter>Header Files\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\Vector3.cpp">
       <Filter>Header Files\math</Filter>
     </ClCompile>
   </ItemGroup>
@@ -35,19 +41,25 @@
     <ClInclude Include="structs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\Utils.h">
+    <ClInclude Include="..\include\BinaryIO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\BinaryIO.h">
+    <ClInclude Include="BoneMagic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\includes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\Vector3.h">
+    <ClInclude Include="..\include\Quaternion.h">
       <Filter>Header Files\math</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\Quaternion.h">
+    <ClInclude Include="..\include\Vector2.h">
+      <Filter>Header Files\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Vector3.h">
       <Filter>Header Files\math</Filter>
     </ClInclude>
   </ItemGroup>
