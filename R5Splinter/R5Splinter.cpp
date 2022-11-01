@@ -5,7 +5,7 @@
 using namespace std::filesystem;
 
 int main(int argc, char* argv[]) {
-	if (argc < 1)
+	if (argc < 2)
 	{
 		printf("==============================================\n");
 		printf("$ Usage : R5Splinter.exe <source> <target> <options>\n");
@@ -23,13 +23,13 @@ int main(int argc, char* argv[]) {
 		return 0;
 	}
 
-	if (argc < 2)
+	if (argc < 3)
 	{
 		printf("Error : Target file not specified\n");
 		return 0;
 	}
 
-	if (argc < 3)
+	if (argc < 4)
 	{
 		printf("Error : options not specified\n");
 		return 0;
