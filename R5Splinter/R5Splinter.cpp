@@ -12,19 +12,19 @@ int main(int argc, char* argv[]) {
 		printf("==============================================\n\n");
 
 		printf("$ Usage       : replace\n");
-		printf("# Example     : R5Splinter.exe a.rmdl b.rmdl replace\n");
+		printf("# Example     : R5Splinter.exe ./a.rmdl ./b.rmdl replace\n");
 		printf("? Description : replaces targets bones with source bones\n\n");
 
 		printf("==============================================\n\n");
 
 		printf("$ Usage       : move -> <source bone name> <pos vector>\n");
-		printf("# Example     : Example : R5Splinter.exe a.rmdl b.rmdl move ja_c_propGun 0 0 20\n");
+		printf("# Example     : Example : R5Splinter.exe ./a.rmdl ./b.rmdl move ja_c_propGun 0 0 20\n");
 		printf("? Description : moves the specified bone along with it's children\n\n");
 
 		printf("==============================================\n\n");
 
 		printf("$ Usage       : movetobone -> <source bone name> <target bone name>\n");
-		printf("# Example     : Example : R5Splinter.exe a.rmdl b.rmdl movetobone ja_c_propGun jx_c_origin\n");
+		printf("# Example     : Example : R5Splinter.exe ./a.rmdl ./b.rmdl movetobone ja_c_propGun jx_c_origin\n");
 		printf("? Description : moves the source bone along with it's children to target bones location\n\n");
 
 		printf("==============================================\n\n");
@@ -146,6 +146,7 @@ int main(int argc, char* argv[]) {
 	}
 	else if (option == "replace")
 	{
+		printf("'%s' replaced with '%s'\n",TargetFileName.c_str(), SourceFileName.c_str());
 	}
 	else {
 		printf("unknown option '%s' found\n", option.c_str());
@@ -154,7 +155,7 @@ int main(int argc, char* argv[]) {
 
 	BinaryIO writer;
 
-	std::string outpath = sourcefile.parent_path().string() + "\\output\\";
+	std::string outpath = targetfile.parent_path().string() + "\\output\\";
 
 	std::filesystem::create_directory(outpath);
 	writer.open(outpath + TargetFileName, BinaryIOMode::Write);
