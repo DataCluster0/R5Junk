@@ -7,19 +7,28 @@ using namespace std::filesystem;
 int main(int argc, char* argv[]) {
 	if (argc < 2)
 	{
-		printf("==============================================\n");
+		printf("\n==============================================\n");
 		printf("$ Usage : R5Splinter.exe <source> <target> <options>\n");
-		printf("==============================================\n");
-		printf("replace -- replaces targets bones with source bones\n");
-		printf("Example : replace\n\n");
+		printf("==============================================\n\n");
 
-		printf("move <source bone name> <pos vector> -- moves the specified bone with it's children\n");
-		printf("Example : move ja_c_propGun 0 0 20\n\n");
+		printf("$ Usage       : replace\n");
+		printf("# Example     : R5Splinter.exe a.rmdl b.rmdl replace\n");
+		printf("? Description : replaces targets bones with source bones\n\n");
 
-		printf("move <source bone name> <target bone name> -- moves the source bone along with it's children to target bones location\n");
-		printf("Example : movetobone ja_c_propGun jx_c_origin\n");
+		printf("==============================================\n\n");
 
-		printf("==============================================\n");
+		printf("$ Usage       : move -> <source bone name> <pos vector>\n");
+		printf("# Example     : Example : R5Splinter.exe a.rmdl b.rmdl move ja_c_propGun 0 0 20\n");
+		printf("? Description : moves the specified bone along with it's children\n\n");
+
+		printf("==============================================\n\n");
+
+		printf("$ Usage       : movetobone -> <source bone name> <target bone name>\n");
+		printf("# Example     : Example : R5Splinter.exe a.rmdl b.rmdl movetobone ja_c_propGun jx_c_origin\n");
+		printf("? Description : moves the source bone along with it's children to target bones location\n\n");
+
+		printf("==============================================\n\n");
+
 		return 0;
 	}
 
@@ -59,7 +68,7 @@ int main(int argc, char* argv[]) {
 	std::string option = std::string(argv[3]);
 
 	size_t SourceInputSize = Utils::GetFileSize(SourceFile);
-	
+
 	BinaryIO SourceReader;
 	SourceReader.open(SourceFile, BinaryIOMode::Read);
 	// read bone data
@@ -107,7 +116,6 @@ int main(int argc, char* argv[]) {
 	}
 	else if (option == "movetobone")
 	{
-
 		std::string sourcename = std::string(argv[4]);
 		int sourcebone = SourceBoneData.FindBoneByName(sourcename);
 
