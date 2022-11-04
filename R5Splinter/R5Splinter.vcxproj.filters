@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Header Files\math">
-      <UniqueIdentifier>{5887ec80-30df-4324-993a-94d4396511a6}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="R5Splinter.cpp">
@@ -24,43 +21,13 @@
     <ClCompile Include="BoneMagic.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\include\Utils.cpp">
-      <Filter>Header Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\include\Quaternion.cpp">
-      <Filter>Header Files\math</Filter>
-    </ClCompile>
-    <ClCompile Include="..\include\Vector2.cpp">
-      <Filter>Header Files\math</Filter>
-    </ClCompile>
-    <ClCompile Include="..\include\Vector3.cpp">
-      <Filter>Header Files\math</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="structs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\BinaryIO.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="BoneMagic.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\Utils.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\includes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\Quaternion.h">
-      <Filter>Header Files\math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\Vector2.h">
-      <Filter>Header Files\math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\Vector3.h">
-      <Filter>Header Files\math</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

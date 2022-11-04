@@ -13,22 +13,10 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Header Files\math">
-      <UniqueIdentifier>{dc35bfaa-6bf4-45d0-a8ff-a213d64354c3}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="R5ReSequancer.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\include\Utils.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\include\Vector3.cpp">
-      <Filter>Header Files\math</Filter>
-    </ClCompile>
-    <ClCompile Include="..\include\Quaternion.cpp">
-      <Filter>Header Files\math</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -37,18 +25,6 @@
     </ClInclude>
     <ClInclude Include="..\include\Utils.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\BinaryIO.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\includes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\Vector3.h">
-      <Filter>Header Files\math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\Quaternion.h">
-      <Filter>Header Files\math</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

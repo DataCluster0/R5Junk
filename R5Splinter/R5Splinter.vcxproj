@@ -133,22 +133,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\include\Quaternion.cpp" />
-    <ClCompile Include="..\include\Utils.cpp" />
-    <ClCompile Include="..\include\Vector2.cpp" />
-    <ClCompile Include="..\include\Vector3.cpp" />
     <ClCompile Include="R5Splinter.cpp" />
     <ClCompile Include="BoneMagic.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\BinaryIO.h" />
-    <ClInclude Include="..\include\includes.h" />
-    <ClInclude Include="..\include\Quaternion.h" />
-    <ClInclude Include="..\include\Utils.h" />
-    <ClInclude Include="..\include\Vector2.h" />
-    <ClInclude Include="..\include\Vector3.h" />
     <ClInclude Include="BoneMagic.h" />
     <ClInclude Include="structs.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\JunkLib\JunkLib.vcxproj">
+      <Project>{b64c0420-f889-44d5-953c-6c1b6e948244}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
