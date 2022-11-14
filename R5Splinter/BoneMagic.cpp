@@ -162,27 +162,30 @@ void STUDIOMDLWriteBones(BinaryIO& writer, FILE_Out& Source, FILE_Out& Target, b
 			nameoffset += (bone.Name.length() + 1) + (bone.SurficeName.length() + 1) + 164;
 		}
 
-		hdr.localattachmentindex = writer.tell();
-		for (int i = 0; i < attachdata.size(); i++)
+		if (attachdata.size() > 0)
 		{
-			auto& attachment = attachdata[i];
+			hdr.localattachmentindex = writer.tell();
+			hdr.numlocalattachments = attachdata.size();
+			for (int i = 0; i < attachdata.size(); i++)
+			{
+				auto& attachment = attachdata[i];
 
-			uint64_t pos = hdr.localattachmentindex + (i * sizeof(mstudioattachmentv54_t));
-			writer.seek(pos);
+				uint64_t pos = hdr.localattachmentindex + (i * sizeof(mstudioattachmentv54_t));
+				writer.seek(pos);
 
-			uint64_t stringoffset = hdr.localattachmentindex + (bonedata.size() * sizeof(mstudioattachmentv54_t)) + nameoffset;
+				uint64_t stringoffset = hdr.localattachmentindex + (bonedata.size() * sizeof(mstudioattachmentv54_t)) + nameoffset;
 
-			attachment.hdr.sznameindex = stringoffset - pos;
+				attachment.hdr.sznameindex = stringoffset - pos;
 
-			writer.write<mstudioattachmentv54_t>(attachment.hdr);
+				writer.write<mstudioattachmentv54_t>(attachment.hdr);
 
-			writer.seek(stringoffset);
+				writer.seek(stringoffset);
 
-			writer.writeString(attachment.Name);
+				writer.writeString(attachment.Name);
 
-			nameoffset += attachment.Name.length() + 1;
+				nameoffset += attachment.Name.length() + 1;
+			}
 		}
-
 
 		hdr.bonetablebynameindex = writer.tell();
 
