@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\R5">
+      <UniqueIdentifier>{0f91e411-8b37-4750-9f01-3cc4f175a129}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\MathHelper.h">
@@ -38,6 +41,9 @@
     </ClInclude>
     <ClInclude Include="..\include\includes.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\structs_VG.h">
+      <Filter>Header Files\R5</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
