@@ -48,6 +48,8 @@ namespace Math
 		// Inequality operator
 		bool operator!=(const Vector3& Rhs) const;
 
+		void Rotate(Vector3 axis, double theta);
+
 		// Unary operator
 		Vector3 operator-() const;
 

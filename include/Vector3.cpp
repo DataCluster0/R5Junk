@@ -150,6 +150,13 @@ namespace Math
 		return Vector3(-X, -Y, -Z);
 	}
 
+	void Vector3::Rotate(Vector3 axis, double theta)
+	{
+		double cosTheta = cos(theta);
+		double sinTheta = sin(theta);
+		*this = ((*this) * cosTheta) + (axis.Cross(*this) * sinTheta) + (axis * axis.Dot(*this)) * (1 - cosTheta);
+	}
+
 	float Vector3::Length() const
 	{
 		return (float)std::sqrt(X * X + Y * Y + Z * Z);

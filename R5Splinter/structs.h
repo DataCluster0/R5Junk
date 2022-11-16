@@ -312,6 +312,14 @@ struct FILE_BONE
 	matrix3x4_t poseToBone;
 };
 
+struct FILE_SEQ
+{
+	std::string Name = "";
+	std::string Activity = "";
+
+	mstudioseqdesc_t hdr{};
+};
+
 struct FILE_Out
 {
 	studiohdr_t hdr{};
@@ -322,6 +330,8 @@ struct FILE_Out
 	std::vector<mstudiobonenametable_t> BoneNameTable{};
 
 	mstudiolinearbonev54_t lhdr{};
+
+	std::vector<FILE_SEQ> seqlist{};
 
 	inline int FindBoneByName(std::string name)
 	{

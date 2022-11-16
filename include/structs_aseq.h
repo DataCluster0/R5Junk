@@ -1,4 +1,4 @@
-#include <includes.h>
+#include "includes.h"
 
 enum mstudioseqflags : uint32_t
 {
@@ -415,42 +415,4 @@ struct ASEQ_Out
 	std::vector<ASEQ_Out_animdesc> animdescs;
 
 	std::vector<int> blendgroups;
-};
-
-size_t Read_mstudio_rle_anim_t(BinaryIO& reader, animflagarrayv54_t boneflag)
-{
-	size_t size = 0;
-
-	auto animv54 = reader.read<mstudio_rle_animv54_t>();
-
-	size += sizeof(mstudio_rle_animv54_t);
-
-	if (animv54.flags & STUDIO_ANIM_ANIMPOS_54)
-		float posscale = reader.read<float>();
-
-	if (boneflag.STUDIO_ANIM_POS_54)
-	{
-		if (animv54.flags & STUDIO_ANIM_ANIMPOS_54)
-			auto animpos = reader.read<mstudioanim_valueptrv54_t>();
-		else
-			Vector48 rawpos = reader.read<Vector48>();
-	}
-
-	if (boneflag.STUDIO_ANIM_ROT_54)
-	{
-		if (animv54.flags & STUDIO_ANIM_ANIMROT_54)
-			auto animrot = reader.read<mstudioanim_valueptrv54_t>();
-		else
-			Quat64 rawrot = reader.read<Quat64>();
-	}
-
-	if (boneflag.STUDIO_ANIM_SCALE_54)
-	{
-		if (animv54.flags & STUDIO_ANIM_ANIMSCALE_54)
-			auto animscale = reader.read<mstudioanim_valueptrv54_t>();
-		else
-			Vector48 rawscale = reader.read<Vector48>();
-	}
-
-	return animv54._tsize;
 };

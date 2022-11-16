@@ -1,6 +1,8 @@
 #pragma once
 #include <includes.h>
+
 using namespace std;
+using namespace Math;
 
 #define VG_POSITION         0x1
 #define VG_PACKED_POSITION  0x2
@@ -61,10 +63,18 @@ struct PackedPosition
 
 		value = packPosition(o + pos).value;
 	}
+
+	inline void RotatePosition(Vector3 rot)
+	{
+		Vector3 o = UnpackPosition();
+
+		o.Rotate(Vector3(1, 0, 0), MathHelper::DegreesToRadians(rot.X));
+		o.Rotate(Vector3(0, 1, 0), MathHelper::DegreesToRadians(rot.Y));
+		o.Rotate(Vector3(0, 0, 1), MathHelper::DegreesToRadians(rot.Z));
+
+		value = packPosition(o).value;
+	}
 };
-
-
-
 
 struct PackedVertexWeights
 {
@@ -288,7 +298,6 @@ struct VTX
 	// same vector2 from vvc
 	Vector2 UVLayer{};
 
-
 	static inline VTX ReadVTX(BinaryIO& Reader, VGMeshNEW& Mesh)
 	{
 		VTX o{};
@@ -343,5 +352,3 @@ struct VTX
 		return o;
 	};
 };
-
-

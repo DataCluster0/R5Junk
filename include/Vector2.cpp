@@ -140,6 +140,14 @@ namespace Math
 		return Vector2(-X, -Y);
 	}
 
+	Vector2 Vector2::Rotate(const Vector2& v, float angle)
+	{
+		float x = v.X * std::cos(angle) - v.Y * std::sin(angle);
+		float y = v.X * std::sin(angle) + v.Y * std::cos(angle);
+
+		return Vector2{ x, y };
+	}
+
 	float Vector2::Length() const
 	{
 		return (float)std::sqrt(X * X + Y * Y);

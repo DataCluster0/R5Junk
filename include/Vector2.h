@@ -59,6 +59,8 @@ namespace Math
 		// Unary operator
 		Vector2 operator-() const;
 
+		Vector2 Rotate(const Vector2& v, float angle);
+
 		// Get the length of this instance
 		float Length() const;
 		// Get the length squared of this instance

@@ -9,7 +9,7 @@ struct VGMeshData
 	std::vector<VTX> vtxlist{};
 };
 
-std::vector<VGMeshData> ReadVGMeshData(BinaryIO& Reader, VGHeader& hdr, Vector3 NewPosition)
+std::vector<VGMeshData> ReadVGMeshData(BinaryIO& Reader, VGHeader& hdr, Vector3 NewPosition, Vector3 NewRot)
 {
 	VGHeader h = Reader.read<VGHeader>();
 
@@ -48,7 +48,13 @@ std::vector<VGMeshData> ReadVGMeshData(BinaryIO& Reader, VGHeader& hdr, Vector3 
 			if (m.flags & VG_POSITION)
 				vtx.Pos += NewPosition;
 			else if (m.flags & VG_PACKED_POSITION)
-				vtx.PKPos.MovePosition(NewPosition);
+			{
+				if (NewRot != Vector3(0, 0, 0))
+					vtx.PKPos.RotatePosition(NewRot);
+
+				if (NewPosition != Vector3(0, 0, 0))
+					vtx.PKPos.MovePosition(NewPosition);
+			}
 
 			vtx.NewPos = vtx.PKPos.UnpackPosition();
 		}
@@ -140,6 +146,9 @@ int main(int argc, char* argv[]) {
 
 	Vector3 NewPos{};
 
+	Vector3 NewRot{};
+
+	// pos
 	if (argc >= 5)
 	{
 		float x = ::atof(std::string(argv[2]).c_str());
@@ -150,10 +159,20 @@ int main(int argc, char* argv[]) {
 	}
 	else
 	{
-		printf("X Y Z not provided\n");
-		printf("argc %d", argc);
+		printf("!!! Move <X Y Z> not provided !!!\n");
 		return 0;
 	}
+
+	// rot
+	if (argc >= 8)
+	{
+		float x = ::atof(std::string(argv[5]).c_str());
+		float y = ::atof(std::string(argv[6]).c_str());
+		float z = ::atof(std::string(argv[7]).c_str());
+
+		NewRot = { x,y,z };
+	}
+
 
 	size_t SourceInputSize = Utils::GetFileSize(SourceFile);
 	char* pDataBuf = new char[SourceInputSize];
@@ -165,7 +184,7 @@ int main(int argc, char* argv[]) {
 
 	VGHeader h{};
 
-	std::vector<VGMeshData> MeshData = ReadVGMeshData(SourceReader, h, NewPos);
+	std::vector<VGMeshData> MeshData = ReadVGMeshData(SourceReader, h, NewPos, NewRot);
 
 	BinaryIO writer;
 

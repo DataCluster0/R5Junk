@@ -20,7 +20,7 @@
 #include <Quaternion.h>
 #include <Vector2.h>
 #include <Vector3.h>
-#include <structs_VG.h>
+#include <Matrix.h>
 
 using namespace Math;
 
@@ -32,7 +32,6 @@ struct Vector32
 	uint32_t z : 10;
 	uint32_t exp : 2;
 };
-
 
 struct Vector48
 {
@@ -79,3 +78,6 @@ struct matrix3x4_t
 	float m10; float m11; float m12; float m13; // r1
 	float m20; float m21; float m22; float m23; // r2
 };
+
+#include <structs_VG.h>
+#include <structs_aseq.h>

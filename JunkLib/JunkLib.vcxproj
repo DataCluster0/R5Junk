@@ -23,7 +23,9 @@
     <ClInclude Include="..\include\Half.h" />
     <ClInclude Include="..\include\includes.h" />
     <ClInclude Include="..\include\MathHelper.h" />
+    <ClInclude Include="..\include\Matrix.h" />
     <ClInclude Include="..\include\Quaternion.h" />
+    <ClInclude Include="..\include\structs_aseq.h" />
     <ClInclude Include="..\include\structs_VG.h" />
     <ClInclude Include="..\include\Utils.h" />
     <ClInclude Include="..\include\Vector2.h" />
@@ -31,6 +33,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\include\Half.cpp" />
+    <ClCompile Include="..\include\Matrix.cpp" />
     <ClCompile Include="..\include\Quaternion.cpp" />
     <ClCompile Include="..\include\Utils.cpp" />
     <ClCompile Include="..\include\Vector2.cpp" />

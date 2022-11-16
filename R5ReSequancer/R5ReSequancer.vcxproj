@@ -133,8 +133,7 @@
     <ClCompile Include="R5ReSequancer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\Utils.h" />
-    <ClInclude Include="structs.h" />
+    <ClInclude Include="..\include\includes.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\JunkLib\JunkLib.vcxproj">
