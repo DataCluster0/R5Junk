@@ -41,7 +41,7 @@ struct PackedPosition
 		return Vector3(x, y, z);
 	};
 
-	static inline PackedPosition packPosition(Vector3 pos)
+	inline PackedPosition packPosition(Vector3 pos)
 	{
 		PackedPosition Data{};
 
@@ -68,9 +68,14 @@ struct PackedPosition
 	{
 		Vector3 o = UnpackPosition();
 
-		o.Rotate(Vector3(1, 0, 0), MathHelper::DegreesToRadians(rot.X));
-		o.Rotate(Vector3(0, 1, 0), MathHelper::DegreesToRadians(rot.Y));
-		o.Rotate(Vector3(0, 0, 1), MathHelper::DegreesToRadians(rot.Z));
+		if (rot.X != 0)
+			o.Rotate(Vector3(1, 0, 0), MathHelper::DegreesToRadians(rot.X));
+
+		if (rot.Y != 0)
+			o.Rotate(Vector3(0, 1, 0), MathHelper::DegreesToRadians(rot.Y));
+
+		if (rot.Z != 0)
+			o.Rotate(Vector3(0, 0, 1), MathHelper::DegreesToRadians(rot.Z));
 
 		value = packPosition(o).value;
 	}
@@ -279,6 +284,183 @@ struct VGHeader
 	}
 };
 
+struct PackedNormal
+{
+	DWORD Value;
+
+	inline Vector3 UnpackTangent(Vector3 Normal)
+	{
+		float x = (int32_t)Value & 1023; // r2.x
+		float r2y = 1 + Normal.Z;
+		r2y = 1.f / r2y;  // rcp
+		float r2z = -r2y * Normal.X;
+		float r2w = Normal.Y * Normal.Y;
+		float r3x = r2z * Normal.Y;
+		float r4x = -r2y * r2w + 1;
+		float r4y = -Normal.X;
+		float r4z = -Normal.Y;
+		float r3z = r2z * Normal.X + 1;
+		float r3y;
+		float r3w = r4y;
+		if (Normal.Z < -0.999899983)  // r1.w
+		{
+			r2y = 0;
+			r2z = -1;
+			r2w = 0;
+		}
+		else
+		{
+			r2y = r3z;
+			r2z = r3x;
+			r2w = r3w;
+		}
+		float r4w = r3x;
+		if (Normal.Z < -0.999899983)  // r1.w
+		{
+			r3x = -1;
+			r3y = 0;
+			r3z = 0;
+		}
+		else
+		{
+			r3x = r4w;
+			r3y = r4x;
+			r3z = r4z;
+		}
+		x = 0.00614192151 * x;
+		float r2x = sin(x);
+		r4x = cos(x);
+		r3x *= r2x;
+		r3y *= r2x;
+		r3z *= r2x;
+		r2x = r2y * r4x + r3x;
+		r2y = r2z * r4x + r3y;
+		r2z = r2w * r4x * r3z;
+
+		// normalizing
+		float r1w = r2x * r2x + r2y * r2y + r2z * r2z;
+		r1w = 1.f / sqrt(r1w);
+		r2x *= r1w;
+		r2y *= r1w;
+		r2z *= r1w;
+
+		return Vector3(r2x, r2y, r2z);
+	}
+
+	inline Vector3 UnpackNormal()
+	{
+		float x, y, z;
+
+		float v87 = ((2 * Value) >> 30);
+		int v88 = 255;
+		if (((8 * Value) >> 31) != 0.0)
+			v88 = -255;
+		float v89 = (float)v88;
+		float v90 = ((Value << 13) >> 23) + -256.0;
+		float v91 = ((16 * Value) >> 23) + -256.0;
+		float v92 = ((v91 * v91) + (255.0 * 255.0)) + (v90 * v90);
+
+		float v93 = sqrtf(v92);
+		int v97 = 0;
+
+		float v1, v2, v3;
+
+		v1 = v90 * (1.0 / v93);
+		v2 = v89 * (1.0 / v93);
+		v3 = v91 * (1.0 / v93);
+
+		if (v87 == 1.0)
+			v97 = -1;
+		else
+			v97 = 0;
+
+		if (v87 == 2.0)
+		{
+			x = v3; y = v1; z = v2;
+		}
+		else
+		{
+			x = v2; y = v3; z = v1;
+		}
+
+		if (!v97)
+		{
+			v1 = x; v2 = y; v3 = z;
+		}
+
+		return Vector3(v1, v2, v3);
+	}
+
+	// Thanks for suffering instead of me floaxy
+	// https://github.com/floxay/apex-legends-pain-snippets/blob/main/VertexNormalPacking.cpp
+	inline PackedNormal packNormal(Vector3 normal)
+	{
+		PackedNormal Result{};
+
+		int16_t v90, v91;
+		uint8_t sign = 0, droppedComponent = 0;
+		float s;
+
+		float f1 = std::abs(normal.X);
+		float f2 = std::abs(normal.Y);
+		float f3 = std::abs(normal.Z);
+
+		if (f1 >= f2 && f1 >= f3)
+			droppedComponent = 0;
+		else if (f2 >= f1 && f2 >= f3)
+			droppedComponent = 1;
+		else
+			droppedComponent = 2;
+
+		switch (droppedComponent)
+		{
+		case 0:
+			sign = normal.X < 0 ? 1 : 0;
+			s = normal.X / (sign ? -255 : 255);
+			v91 = (int16_t)std::roundf((normal.Y / s) + 256);
+			v90 = (int16_t)std::roundf((normal.Z / s) + 256);
+			break;
+		case 1:
+			sign = normal.Y < 0 ? 1 : 0;
+			s = normal.Y / (sign ? -255 : 255);
+			v90 = (int16_t)std::roundf((normal.X / s) + 256);
+			v91 = (int16_t)std::roundf((normal.Z / s) + 256);
+			break;
+		case 2:
+			sign = normal.Z < 0 ? 1 : 0;
+			s = normal.Z / (sign ? -255 : 255);
+			v91 = (int16_t)std::roundf((normal.X / s) + 256);
+			v90 = (int16_t)std::roundf((normal.Y / s) + 256);
+			break;
+		default:
+			break;
+		}
+
+		Result.Value = (droppedComponent << 29) + (sign << 28) + (v91 << 19) + (v90 << (19 - 9));
+
+		return Result;
+	}
+
+	inline void RotateNormal(Vector3 rot)
+	{
+		Vector3 o = UnpackNormal();
+		Vector3 Tangent = UnpackTangent(o);
+
+		if (rot.X != 0)
+			o.Rotate(Vector3(1, 0, 0), MathHelper::DegreesToRadians(rot.X));
+
+		if (rot.Y != 0)
+			o.Rotate(Vector3(0, 1, 0), MathHelper::DegreesToRadians(rot.Y));
+
+		if (rot.Z != 0)
+			o.Rotate(Vector3(0, 0, 1), MathHelper::DegreesToRadians(rot.Z));
+
+		o.Normalize();
+
+		Value = packNormal(o).Value;
+	}
+};
+
 struct VTX
 {
 	Vector3 NewPos{};
@@ -288,7 +470,7 @@ struct VTX
 
 	PackedVertexWeights PKWeights{};
 
-	DWORD normal{}; // packed normal
+	PackedNormal normal{}; // packed normal
 
 	// vertex color from vvc
 	VertexColor_t color{};
@@ -310,7 +492,7 @@ struct VTX
 		if (Mesh.flags & VG_PACKED_WEIGHTS)
 			o.PKWeights = Reader.read<PackedVertexWeights>();
 
-		o.normal = Reader.read<DWORD>(); // packed normal
+		o.normal = Reader.read<PackedNormal>(); // packed normal
 
 		// vertex color from vvc
 		if (Mesh.flags & VG_VERTEX_COLOR)
@@ -337,7 +519,7 @@ struct VTX
 		if (Mesh.flags & VG_PACKED_WEIGHTS)
 			o.PKWeights = Reader.read<PackedVertexWeights>();
 
-		o.normal = Reader.read<DWORD>(); // packed normal
+		o.normal = Reader.read<PackedNormal>(); // packed normal
 
 		// vertex color from vvc
 		if (Mesh.flags & VG_VERTEX_COLOR)

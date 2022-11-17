@@ -50,8 +50,11 @@ std::vector<VGMeshData> ReadVGMeshData(BinaryIO& Reader, VGHeader& hdr, Vector3 
 			else if (m.flags & VG_PACKED_POSITION)
 			{
 				if (NewRot != Vector3(0, 0, 0))
+				{
 					vtx.PKPos.RotatePosition(NewRot);
-
+					vtx.normal.RotateNormal(NewRot);
+				}
+					
 				if (NewPosition != Vector3(0, 0, 0))
 					vtx.PKPos.MovePosition(NewPosition);
 			}
@@ -100,7 +103,7 @@ void WriteVGMeshData(BinaryIO& writer, VGHeader& hdr, std::vector<VGMeshData>& D
 			if (h.flags & VG_PACKED_WEIGHTS)
 				writer.write<PackedVertexWeights>(vtx.PKWeights);
 
-			writer.write<DWORD>(vtx.normal);
+			writer.write<PackedNormal>(vtx.normal);
 
 			// vertex color from vvc
 			if (h.flags & VG_VERTEX_COLOR)
@@ -198,6 +201,6 @@ int main(int argc, char* argv[]) {
 
 	WriteVGMeshData(writer, h, MeshData);
 
-	system("pause");
+	//system("pause");
 	return EXIT_SUCCESS;
 }
