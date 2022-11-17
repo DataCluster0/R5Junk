@@ -250,34 +250,34 @@ void STUDIOMDLWriteBones(BinaryIO& writer, FILE_Out& Source, FILE_Out& Target, b
 			writer.write<mstudiolinearbonev54_t>(lbonetable);
 		}
 
-		if (Source.seqlist.size())
-		{
-			for (int i = 0; i < Source.seqlist.size(); i++)
-			{
-				FILE_SEQ& file = Source.seqlist[i];
-
-				uint64_t weightpos = writer.tell();
-				{
-					float weight = 1;
-
-					for (auto& bone : bonedata)
-						writer.write<float>(weight);
-				}
-
-				writer.writeString(file.Name);
-				writer.writeString(file.Activity);
-
-				writer.seek(hdr.localseqindex + (i * sizeof(mstudioseqdesc_t)));
-				file.hdr.weightlistindex = weightpos - writer.tell();
-				file.hdr.szlabelindex = (weightpos + (bonedata.size() * 4)) - writer.tell();
-				file.hdr.szactivitynameindex = file.hdr.szlabelindex + file.Name.length() + 1;
-
-				writer.write<mstudioseqdesc_t>(file.hdr);
-			}
-		}
+		//if (Source.seqlist.size())
+		//{
+		//	for (int i = 0; i < Source.seqlist.size(); i++)
+		//	{
+		//		FILE_SEQ& file = Source.seqlist[i];
+		//
+		//		uint64_t weightpos = writer.tell();
+		//		{
+		//			float weight = 1;
+		//
+		//			for (auto& bone : bonedata)
+		//				writer.write<float>(weight);
+		//		}
+		//
+		//		writer.writeString(file.Name);
+		//		writer.writeString(file.Activity);
+		//
+		//		writer.seek(hdr.localseqindex + (i * sizeof(mstudioseqdesc_t)));
+		//		file.hdr.weightlistindex = weightpos - writer.tell();
+		//		file.hdr.szlabelindex = (weightpos + (bonedata.size() * 4)) - writer.tell();
+		//		file.hdr.szactivitynameindex = file.hdr.szlabelindex + file.Name.length() + 1;
+		//
+		//		writer.write<mstudioseqdesc_t>(file.hdr);
+		//	}
+		//}
 	}
 
-	//hdr.numlocalseq = 0;
+	hdr.numlocalseq = 0;
 	hdr.numbones = bonedata.size();
 	hdr.length = writer.size();
 	// write studio header
