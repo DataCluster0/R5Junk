@@ -150,7 +150,10 @@ struct studiohdr_t
 	int m_nBoneFlexDriverCount; // unsure if that's what it is in apex
 	int m_nBoneFlexDriverIndex;
 
-	int unk1_v54[7];
+	int unkindexflex;
+
+	// aabb tree in here maybe? definitely unused
+	int unk1_v54[6];
 
 	// always "" or "Titan"
 	int unkstringindex;
@@ -274,6 +277,59 @@ struct mstudiolinearbonev54_t
 	uint32_t posetoboneindex = 0;
 };
 
+struct mstudiojigglebonev54_t
+{
+	uint8_t flags; // looks to be.
+
+	uint8_t bone; // id of bone, might be single byte
+
+	uint16_t unused; // possibly unused
+
+	// general params
+	float length; // how far from bone base, along bone, is tip
+	float tipMass;
+
+	float unkfloat; // v54 adds an extra value here but otherwise the same
+	// observed values are between 0-1
+
+// flexible params
+	float yawStiffness;
+	float yawDamping;
+	float pitchStiffness;
+	float pitchDamping;
+	float alongStiffness;
+	float alongDamping;
+
+	// angle constraint
+	float angleLimit; // maximum deflection of tip in radians
+
+	// yaw constraint
+	float minYaw; // in radians
+	float maxYaw; // in radians
+	float yawFriction;
+	float yawBounce;
+
+	// pitch constraint
+	float minPitch; // in radians
+	float maxPitch; // in radians
+	float pitchFriction;
+	float pitchBounce;
+
+	// base spring
+	float baseMass;
+	float baseStiffness;
+	float baseDamping;
+	float baseMinLeft;
+	float baseMaxLeft;
+	float baseLeftFriction;
+	float baseMinUp;
+	float baseMaxUp;
+	float baseUpFriction;
+	float baseMinForward;
+	float baseMaxForward;
+	float baseForwardFriction;
+};
+
 // bone id in alphabetical order
 struct mstudiobonenametable_t
 {
@@ -332,6 +388,10 @@ struct FILE_Out
 	mstudiolinearbonev54_t lhdr{};
 
 	std::vector<FILE_SEQ> seqlist{};
+
+	std::vector<mstudiojigglebonev54_t> JiggleList{};
+	std::vector<uint8_t> JiggleDataIndexes{};
+	std::vector<uint8_t> JiggleData{};
 
 	inline int FindBoneByName(std::string name)
 	{

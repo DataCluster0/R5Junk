@@ -74,6 +74,33 @@ FILE_Out STUDIOMDLReadBones(BinaryIO& Reader, std::string filename)
 			Reader.seek(surficepos);
 			bone.SurficeName = Reader.readString();
 		}
+
+		int jigglebonecount = 0;
+
+		for (int i = 0; i < BoneData.size(); i++)
+		{
+			auto& bone = BoneData[i];
+
+			if (bone.hdr.proctype == 5)
+				jigglebonecount++;
+		}
+
+		if (jigglebonecount)
+		{
+			Reader.seek(mdlhdr.boneindex + (BoneData.size() * sizeof(mstudiobonev54_t)));
+
+			for (int i = 0; i < jigglebonecount; i++)
+				DataOut.JiggleList.push_back(Reader.read<mstudiojigglebonev54_t>());
+
+			Reader.seek(mdlhdr.m_nBoneFlexDriverIndex);
+
+			for (int i = 0; i < mdlhdr.m_nBoneFlexDriverCount; i++)
+				DataOut.JiggleDataIndexes.push_back(Reader.read<uint8_t>());
+
+			Reader.seek(mdlhdr.unkindexflex);
+			for (int i = 0; i < BoneData.size(); i++)
+				DataOut.JiggleData.push_back(Reader.read<uint8_t>());
+		}
 	}
 
 	// read nametable
@@ -156,11 +183,6 @@ void STUDIOMDLWriteBones(BinaryIO& writer, FILE_Out& Source, FILE_Out& Target, b
 			uint64_t pos = hdr.boneindex + (i * sizeof(mstudiobonev54_t));
 			writer.seek(pos);
 
-			uint64_t stringoffset = hdr.boneindex + (bonedata.size() * sizeof(mstudiobonev54_t)) + nameoffset;
-
-			bone.hdr.sznameindex = stringoffset - pos;
-			bone.hdr.surfacepropidx = (stringoffset + bone.Name.length() + 1) - pos;
-
 			bone.hdr.flags = bone.flag;
 			bone.hdr.parent = bone.parent;
 			bone.hdr.pos = bone.pos;
@@ -168,16 +190,52 @@ void STUDIOMDLWriteBones(BinaryIO& writer, FILE_Out& Source, FILE_Out& Target, b
 			bone.hdr.rot = bone.rot;
 			bone.hdr.poseToBone = bone.poseToBone;
 
-			bone.hdr.proctype = 0;
+			writer.write<mstudiobonev54_t>(bone.hdr);
+		}
+
+		if (Source.JiggleList.size())
+		{
+			writer.seek(hdr.boneindex + (bonedata.size() * sizeof(mstudiobonev54_t)));
+
+			for (auto& JiggleBone : Source.JiggleList)
+				writer.write<mstudiojigglebonev54_t>(JiggleBone);
+
+			hdr.m_nBoneFlexDriverIndex = writer.tell();
+			hdr.m_nBoneFlexDriverCount = Source.JiggleDataIndexes.size();
+
+			for (auto& Index : Source.JiggleDataIndexes)
+				writer.write<uint8_t>(Index);
+
+			hdr.unkindexflex = writer.tell();
+
+			for (auto& Data : Source.JiggleData)
+				writer.write<uint8_t>(Data);
+		}
+
+		// write bone strings
+		for (int i = 0; i < bonedata.size(); i++)
+		{
+			auto& bone = bonedata[i];
+
+			uint64_t pos = hdr.boneindex + (i * sizeof(mstudiobonev54_t));
+			writer.seek(pos);
+
+			uint64_t size = (bonedata.size() * sizeof(mstudiobonev54_t)) + (Source.JiggleList.size() * sizeof(mstudiojigglebonev54_t)) + 
+				            (Source.JiggleDataIndexes.size() * sizeof(uint8_t)) + (Source.JiggleData.size() * sizeof(uint8_t));
+
+			uint64_t stringoffset = hdr.boneindex + size + nameoffset;
+
+			bone.hdr.sznameindex = stringoffset - pos;
+			bone.hdr.surfacepropidx = (stringoffset + bone.Name.length() + 1) - pos;
 
 			writer.write<mstudiobonev54_t>(bone.hdr);
 
 			writer.seek(stringoffset);
-			writer.writeString(bone.Name);
 
+			writer.writeString(bone.Name);
 			writer.writeString(bone.SurficeName);
 
-			nameoffset += (bone.Name.length() + 1) + (bone.SurficeName.length() + 1) + 164;
+			nameoffset += (bone.Name.length() + 1) + (bone.SurficeName.length() + 1);
 		}
 
 		if (attachdata.size() > 0)
@@ -252,6 +310,8 @@ void STUDIOMDLWriteBones(BinaryIO& writer, FILE_Out& Source, FILE_Out& Target, b
 
 		//if (Source.seqlist.size())
 		//{
+		//	hdr.numlocalseq = Source.seqlist.size();
+		//
 		//	for (int i = 0; i < Source.seqlist.size(); i++)
 		//	{
 		//		FILE_SEQ& file = Source.seqlist[i];
@@ -277,7 +337,7 @@ void STUDIOMDLWriteBones(BinaryIO& writer, FILE_Out& Source, FILE_Out& Target, b
 		//}
 	}
 
-	hdr.numlocalseq = 0;
+	//hdr.numlocalseq = 0;
 	hdr.numbones = bonedata.size();
 	hdr.length = writer.size();
 	// write studio header
