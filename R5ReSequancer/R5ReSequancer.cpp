@@ -338,7 +338,7 @@ int main(int argc, char* argv[]) {
 
 			if (IsExternal && !pExtDataBuf)
 			{
-				printf("%s -> .seqdata not found skipping...", filepath.filename().string().c_str());
+				printf("%s -> .seqdata not found skipping...\n", filepath.filename().string().c_str());
 				continue;
 			}
 
