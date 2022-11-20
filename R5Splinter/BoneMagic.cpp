@@ -391,7 +391,7 @@ void STUDIOMDLWriteBones(BinaryIO& writer, FILE_Out& Source, FILE_Out& Target, b
 			{
 				FILE_NODE& Node = Data[i];
 
-				int pos = (hdr.numlocalnodes * (sizeof(mstudionodename_t) + sizeof(int))) + (i * sizeof(mstudionodedata_t));
+				int pos = hdr.localnodenameindex + (hdr.numlocalnodes * (sizeof(mstudionodename_t) + sizeof(int))) + (i * sizeof(mstudionodedata_t));
 				writer.write<int>(pos);
 			}
 
