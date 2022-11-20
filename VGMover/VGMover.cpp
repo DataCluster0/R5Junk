@@ -124,11 +124,11 @@ int main(int argc, char* argv[]) {
 	if (argc < 2)
 	{
 		printf("\n==============================================\n");
-		printf("$ Usage : VGMover.exe <source> <x y z>\n");
+		printf("$ Usage : VGMover.exe <source> <pos x y z> <rot x y z>\n");
 		printf("==============================================\n\n");
 
 		printf("$ Usage       : replace\n");
-		printf("# Example     : VGMover.exe ./a.vg 0 10.0 0\n");
+		printf("# Example     : VGMover.exe ./a.vg 0 10.0 0 0 180 180\n");
 		printf("? Description : Moves the vg vertex positions\n\n");
 
 		printf("==============================================\n\n");

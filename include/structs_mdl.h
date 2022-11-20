@@ -191,6 +191,405 @@ struct studiohdr_t
 	//int unksize1; // might be offset
 };
 
+
+struct studiohdr_t_v121
+{
+	int id; // Model format ID, such as "IDST" (0x49 0x44 0x53 0x54)
+	int version; // Format version number, such as 48 (0x30,0x00,0x00,0x00)
+	int checksum; // This has to be the same in the phy and vtx files to load!
+	int sznameindex; // This has been moved from studiohdr2 to the front of the main header.
+	char name[64]; // The internal name of the model, padding with null bytes.
+	// Typically "my_model.mdl" will have an internal name of "my_model"
+	int length; // Data size of MDL file in bytes.
+
+	Vector3 eyeposition;	// ideal eye position
+
+	Vector3 illumposition;	// illumination center
+
+	Vector3 hull_min;		// ideal movement hull size
+	Vector3 hull_max;
+
+	Vector3 view_bbmin;		// clipping bounding box
+	Vector3 view_bbmax;
+
+	int flags;
+
+	int numbones; // bones
+	int boneindex;
+
+	int numbonecontrollers; // bone controllers
+	int bonecontrollerindex;
+
+	int numhitboxsets;
+	int hitboxsetindex;
+
+	// unused now
+	int numlocalanim; // animations/poses
+	int localanimindex; // animation descriptions
+
+	int numlocalseq; // sequences
+	int	localseqindex;
+
+	int activitylistversion; // initialization flag - have the sequences been indexed?
+
+	// mstudiotexture_t
+	// short rpak path
+	// raw textures
+	int materialtypesindex;
+	int numtextures; // the material limit exceeds 128, probably 256.
+	int textureindex;
+
+	// this should always only be one, unless using vmts.
+	// raw textures search paths
+	int numcdtextures;
+	int cdtextureindex;
+
+	// replaceable textures tables
+	int numskinref;
+	int numskinfamilies;
+	int skinindex;
+
+	int numbodyparts;
+	int bodypartindex;
+
+	int numlocalattachments;
+	int localattachmentindex;
+
+	int numlocalnodes;
+	int localnodeindex;
+	int localnodenameindex;
+
+	int numunknodes;
+	int unknodexindex;
+
+	int numikchains;
+	int ikchainindex;
+
+	// this is rui meshes
+	int numruimeshes;
+	int ruimeshindex;
+
+	int numlocalposeparameters;
+	int localposeparamindex;
+
+	int surfacepropindex;
+
+	int keyvalueindex;
+	int keyvaluesize;
+
+	int numlocalikautoplaylocks;
+	int localikautoplaylockindex;
+
+	float mass;
+	int contents;
+
+	// unused for packed models
+	int numincludemodels;
+	int includemodelindex;
+
+	uint32_t virtualModel;
+
+	int bonetablebynameindex;
+
+	// stuff moved from vg in v12.1
+	int numvgmeshes;
+	int vgmeshindex;
+
+	int boneremapindex;
+	int numboneremaps;
+
+	int unk_v54_v121;
+
+	int vgsize;
+
+	uint16_t unk_vg; // same as padding in vg header
+	uint16_t vglodcount; // same as lod count in vg header
+
+	int unk1_vg; // same as unk1 in vg header
+
+	int vgloddataindex;
+	int numvgloddata;
+
+	int vglodheaderindex;
+	int numvglodheader;
+
+	float fadedistance;
+
+	float gathersize; // what. from r5r struct
+
+	float flVertAnimFixedPointScale; // to be verified
+	int surfacepropLookup; // saved in the file
+
+	// asset bakery strings if it has any
+	int mayaindex;
+
+	int numsrcbonetransform;
+	int srcbonetransformindex;
+
+	int	illumpositionattachmentindex;
+
+	int linearboneindex;
+
+	int m_nBoneFlexDriverCount; // unsure if that's what it is in apex
+	int m_nBoneFlexDriverIndex;
+
+	int unkindexflex;
+
+	// always "" or "Titan"
+	int unkstringindex;
+
+	// the indexes are added to the offset in the rpak mdl_ header.
+	// vphy isn't vphy, looks like a heavily modified vphy.
+	// something different about these now
+	int vtxindex; // VTX
+	int vvdindex; // VVD / IDSV
+	int vvcindex; // VVC / IDCV 
+	int vphyindex; // VPHY / IVPS
+
+	int vtxsize;
+	int vvdsize;
+	int vvcsize;
+	int vphysize;
+
+	// only seen on '_animated' suffixed models so far
+	int unkcount3;
+	int unkindex3;
+
+	// Per Tri Collision AABB size
+	Vector3 mins;
+	Vector3 maxs; // seem to be the same as hull size
+
+	int unkindex4; // chunk before unkindex2 sometimes
+
+	int unk4_v54[3];
+
+	inline studiohdr_t ToFirstVersion()
+	{
+		studiohdr_t mdlhdr{};
+
+		mdlhdr.id = id;
+		mdlhdr.version = version;
+		mdlhdr.numbones = numbones;
+		mdlhdr.numlocalattachments = numlocalattachments;
+
+		mdlhdr.localattachmentindex = localattachmentindex;
+		mdlhdr.unkindexflex = unkindexflex;
+		mdlhdr.m_nBoneFlexDriverCount = m_nBoneFlexDriverCount;
+		mdlhdr.m_nBoneFlexDriverIndex = m_nBoneFlexDriverIndex;
+		mdlhdr.boneindex = boneindex;
+		mdlhdr.localseqindex = localseqindex;
+		mdlhdr.numlocalseq = numlocalseq;
+		mdlhdr.localposeparamindex = localposeparamindex;
+		mdlhdr.numlocalposeparameters = numlocalposeparameters;
+		mdlhdr.localnodenameindex = localnodenameindex;
+		mdlhdr.numlocalnodes = numlocalnodes;
+		mdlhdr.linearboneindex = linearboneindex;
+		mdlhdr.bonetablebynameindex = bonetablebynameindex;
+
+		return mdlhdr;
+	}
+};
+
+struct studiohdr_t_v122
+{
+	int id; // Model format ID, such as "IDST" (0x49 0x44 0x53 0x54)
+	int version; // Format version number, such as 48 (0x30,0x00,0x00,0x00)
+	int checksum; // This has to be the same in the phy and vtx files to load!
+	int sznameindex; // This has been moved from studiohdr2 to the front of the main header.
+	char name[64]; // The internal name of the model, padding with null bytes.
+	// Typically "my_model.mdl" will have an internal name of "my_model"
+	int length; // Data size of MDL file in bytes.
+
+	Vector3 eyeposition;	// ideal eye position
+
+	Vector3 illumposition;	// illumination center
+
+	Vector3 hull_min;		// ideal movement hull size
+	Vector3 hull_max;
+
+	Vector3 view_bbmin;		// clipping bounding box
+	Vector3 view_bbmax;
+
+	int flags;
+
+	int numbones; // bones
+	int boneindex;
+
+	int numbonecontrollers; // bone controllers
+	int bonecontrollerindex;
+
+	int numhitboxsets;
+	int hitboxsetindex;
+
+	// unused now
+	int numlocalanim; // animations/poses
+	int localanimindex; // animation descriptions
+
+	int numlocalseq; // sequences
+	int	localseqindex;
+
+	int activitylistversion; // initialization flag - have the sequences been indexed?
+
+	// mstudiotexture_t
+	// short rpak path
+	// raw textures
+	int materialtypesindex;
+	int numtextures; // the material limit exceeds 128, probably 256.
+	int textureindex;
+
+	// this should always only be one, unless using vmts.
+	// raw textures search paths
+	int numcdtextures;
+	int cdtextureindex;
+
+	// replaceable textures tables
+	int numskinref;
+	int numskinfamilies;
+	int skinindex;
+
+	int numbodyparts;
+	int bodypartindex;
+
+	int numlocalattachments;
+	int localattachmentindex;
+
+	int numlocalnodes;
+	int localnodeindex;
+	int localnodenameindex;
+
+	int numunknodes;
+	int unknodexindex;
+
+	int numikchains;
+	int ikchainindex;
+
+	// this is rui meshes
+	int numruimeshes;
+	int ruimeshindex;
+
+	int numlocalposeparameters;
+	int localposeparamindex;
+
+	int surfacepropindex;
+
+	int keyvalueindex;
+	int keyvaluesize;
+
+	int numlocalikautoplaylocks;
+	int localikautoplaylockindex;
+
+	float mass;
+	int contents;
+
+	// unused for packed models
+	int numincludemodels;
+	int includemodelindex;
+
+	uint32_t virtualModel;
+
+	int bonetablebynameindex;
+
+	// stuff moved from vg in v12.1
+	int numvgmeshes;
+	int vgmeshindex;
+
+	int boneremapindex;
+	int numboneremaps;
+
+	int unk_v54_v121;
+
+	int vgsize;
+
+	uint16_t unk_vg; // same as padding in vg header
+	uint16_t vglodcount; // same as lod count in vg header
+
+	int unk1_vg; // same as unk1 in vg header
+
+	int vgloddataindex;
+	int numvgloddata;
+
+	int vglodheaderindex;
+	int numvglodheader;
+
+	float fadedistance;
+
+	float gathersize; // what. from r5r struct
+
+	float flVertAnimFixedPointScale; // to be verified
+	int surfacepropLookup; // saved in the file
+
+	int unk_v54_v122; // added in transition version
+
+	// asset bakery strings if it has any
+	int mayaindex;
+
+	int numsrcbonetransform;
+	int srcbonetransformindex;
+
+	int	illumpositionattachmentindex;
+
+	int linearboneindex;
+
+	int m_nBoneFlexDriverCount; // unsure if that's what it is in apex
+	int m_nBoneFlexDriverIndex;
+
+	int unkindexflex;
+
+	// always "" or "Titan"
+	int unkstringindex;
+
+	// the indexes are added to the offset in the rpak mdl_ header.
+	// vphy isn't vphy, looks like a heavily modified vphy.
+	// something different about these now
+	int vtxindex; // VTX
+	int vvdindex; // VVD / IDSV
+	int vvcindex; // VVC / IDCV 
+	int vphyindex; // VPHY / IVPS
+
+	int vtxsize;
+	int vvdsize;
+	int vvcsize;
+	int vphysize;
+
+	// only seen on '_animated' suffixed models so far
+	int unkcount3;
+	int unkindex3;
+
+	// Per Tri Collision AABB size
+	Vector3 mins;
+	Vector3 maxs; // seem to be the same as hull size
+
+	int unkindex4; // chunk before unkindex2 sometimes
+
+	int unk4_v54[3];
+
+	inline studiohdr_t ToFirstVersion()
+	{
+		studiohdr_t mdlhdr{};
+
+		mdlhdr.id = id;
+		mdlhdr.version = version;
+		mdlhdr.numbones = numbones;
+		mdlhdr.numlocalattachments = numlocalattachments;
+
+		mdlhdr.localattachmentindex = localattachmentindex;
+		mdlhdr.unkindexflex = unkindexflex;
+		mdlhdr.m_nBoneFlexDriverCount = m_nBoneFlexDriverCount;
+		mdlhdr.m_nBoneFlexDriverIndex = m_nBoneFlexDriverIndex;
+		mdlhdr.boneindex = boneindex;
+		mdlhdr.localseqindex = localseqindex;
+		mdlhdr.numlocalseq = numlocalseq;
+		mdlhdr.localposeparamindex = localposeparamindex;
+		mdlhdr.numlocalposeparameters = numlocalposeparameters;
+		mdlhdr.localnodenameindex = localnodenameindex;
+		mdlhdr.numlocalnodes = numlocalnodes;
+		mdlhdr.linearboneindex = linearboneindex;
+		mdlhdr.bonetablebynameindex = bonetablebynameindex;
+
+		return mdlhdr;
+	}
+};
+
 struct studiohdr_t_v13
 {
 	int id; // Model format ID, such as "IDST" (0x49 0x44 0x53 0x54)
@@ -372,6 +771,349 @@ struct studiohdr_t_v13
 
 		mdlhdr.id = id;
 		mdlhdr.version = version;
+		mdlhdr.numbones = numbones;
+		mdlhdr.numlocalattachments = numlocalattachments;
+
+		mdlhdr.localattachmentindex = localattachmentindex;
+		mdlhdr.unkindexflex = unkindexflex;
+		mdlhdr.m_nBoneFlexDriverCount = m_nBoneFlexDriverCount;
+		mdlhdr.m_nBoneFlexDriverIndex = m_nBoneFlexDriverIndex;
+		mdlhdr.boneindex = boneindex;
+		mdlhdr.localseqindex = localseqindex;
+		mdlhdr.numlocalseq = numlocalseq;
+		mdlhdr.localposeparamindex = localposeparamindex;
+		mdlhdr.numlocalposeparameters = numlocalposeparameters;
+		mdlhdr.localnodenameindex = localnodenameindex;
+		mdlhdr.numlocalnodes = numlocalnodes;
+		mdlhdr.linearboneindex = linearboneindex;
+		mdlhdr.bonetablebynameindex = bonetablebynameindex;
+
+		return mdlhdr;
+	}
+};
+
+struct studiohdr_t_v14
+{
+	int id; // Model format ID, such as "IDST" (0x49 0x44 0x53 0x54)
+	int version; // Format version number, such as 48 (0x30,0x00,0x00,0x00)
+	int checksum; // This has to be the same in the phy and vtx files to load!
+	int sznameindex; // No longer stored in string block, uses string in header.
+	char name[64]; // The internal name of the model, padding with null bytes.
+	// Typically "my_model.mdl" will have an internal name of "my_model"
+	int length; // Data size of MDL file in bytes.
+
+	Vector3 eyeposition;	// ideal eye position
+
+	Vector3 illumposition;	// illumination center
+
+	Vector3 hull_min;		// ideal movement hull size
+	Vector3 hull_max;
+
+	Vector3 view_bbmin;		// clipping bounding box
+	Vector3 view_bbmax;
+
+	int flags;
+
+	int numbones; // bones
+	int boneindex;
+
+	int numbonecontrollers; // bone controllers
+	int bonecontrollerindex;
+
+	int numhitboxsets;
+	int hitboxsetindex;
+
+	// unused now
+	int numlocalanim; // animations/poses
+	int localanimindex; // animation descriptions
+
+	int numlocalseq; // sequences
+	int	localseqindex;
+
+	int unk_v54_v14[2]; // added in v13 -> v14
+
+	int activitylistversion; // initialization flag - have the sequences been indexed?
+
+	// mstudiotexture_t
+	// short rpak path
+	// raw textures
+	int materialtypesindex;
+	int numtextures; // the material limit exceeds 128, probably 256.
+	int textureindex;
+
+	// this should always only be one, unless using vmts.
+	// raw textures search paths
+	int numcdtextures;
+	int cdtextureindex;
+
+	// replaceable textures tables
+	int numskinref;
+	int numskinfamilies;
+	int skinindex;
+
+	int numbodyparts;
+	int bodypartindex;
+
+	int numlocalattachments;
+	int localattachmentindex;
+
+	int numlocalnodes;
+	int localnodeindex;
+	int localnodenameindex;
+
+	int numunknodes;
+	int unknodexindex;
+
+	int numikchains;
+	int ikchainindex;
+
+	// this is rui meshes
+	int numruimeshes;
+	int ruimeshindex;
+
+	int numlocalposeparameters;
+	int localposeparamindex;
+
+	int surfacepropindex;
+
+	int keyvalueindex;
+	int keyvaluesize;
+
+	int numlocalikautoplaylocks;
+	int localikautoplaylockindex;
+
+	float mass;
+	int contents;
+
+	// unused for packed models
+	int numincludemodels;
+	int includemodelindex;
+
+	uint32_t virtualModel;
+
+	int bonetablebynameindex;
+
+	// stuff moved from vg in v12.1
+	int numvgmeshes;
+	int vgmeshindex;
+
+	int boneremapindex;
+	int numboneremaps;
+
+	int unk_v54_v121;
+
+	int vgsize;
+
+	uint16_t unk_vg; // same as padding in vg header
+	uint16_t vglodcount; // same as lod count in vg header
+
+	int unk1_vg; // same as unk1 in vg header
+
+	int vgloddataindex;
+	int numvgloddata;
+
+	int vglodheaderindex;
+	int numvglodheader;
+
+	float fadedistance;
+
+	float gathersize; // what. from r5r struct
+
+	float flVertAnimFixedPointScale; // to be verified
+	int surfacepropLookup; // saved in the file
+
+	int unk_v54_v122; // added in transition version
+
+	// asset bakery strings if it has any
+	int mayaindex;
+
+	int numsrcbonetransform;
+	int srcbonetransformindex;
+
+	int	illumpositionattachmentindex;
+
+	int linearboneindex;
+
+	int m_nBoneFlexDriverCount; // unsure if that's what it is in apex
+	int m_nBoneFlexDriverIndex;
+
+	int unkindexflex;
+
+	// always "" or "Titan"
+	int unkstringindex;
+
+	// the indexes are added to the offset in the rpak mdl_ header.
+	// vphy isn't vphy, looks like a heavily modified vphy.
+	// something different about these now
+	int vtxindex; // VTX
+	int vvdindex; // VVD / IDSV
+	int vvcindex; // VVC / IDCV 
+	int vphyindex; // VPHY / IVPS
+
+	int vtxsize;
+	int vvdsize;
+	int vvcsize;
+	int vphysize;
+
+	// only seen on '_animated' suffixed models so far
+	int unkcount3;
+	int unkindex3;
+
+	// Per Tri Collision AABB size
+	Vector3 mins;
+	Vector3 maxs; // seem to be the same as hull size
+
+	int unkindex4; // chunk before unkindex2 sometimes
+
+	int unk4_v54[3]; // int16s
+
+	int unk1_v54_v13[3];
+
+	inline studiohdr_t ToFirstVersion()
+	{
+		studiohdr_t mdlhdr{};
+
+		mdlhdr.id = id;
+		mdlhdr.version = version;
+		mdlhdr.numbones = numbones;
+		mdlhdr.numlocalattachments = numlocalattachments;
+
+		mdlhdr.localattachmentindex = localattachmentindex;
+		mdlhdr.unkindexflex = unkindexflex;
+		mdlhdr.m_nBoneFlexDriverCount = m_nBoneFlexDriverCount;
+		mdlhdr.m_nBoneFlexDriverIndex = m_nBoneFlexDriverIndex;
+		mdlhdr.boneindex = boneindex;
+		mdlhdr.localseqindex = localseqindex;
+		mdlhdr.numlocalseq = numlocalseq;
+		mdlhdr.localposeparamindex = localposeparamindex;
+		mdlhdr.numlocalposeparameters = numlocalposeparameters;
+		mdlhdr.localnodenameindex = localnodenameindex;
+		mdlhdr.numlocalnodes = numlocalnodes;
+		mdlhdr.linearboneindex = linearboneindex;
+		mdlhdr.bonetablebynameindex = bonetablebynameindex;
+
+		return mdlhdr;
+	}
+};
+
+struct rstudiohdr_t_v16
+{
+	int flags;
+	int checksum; // unsure if this is still checksum, there isn't any other files that have it still
+	short sznameindex; // No longer stored in string block, uses string in header.
+	char name[32]; // The internal name of the model, padding with null bytes.
+	// Typically "my_model.mdl" will have an internal name of "my_model"
+	uint8_t unk_v16;
+
+	uint8_t surfacepropLookup; // saved in the file
+
+	float mass;
+
+	int unk1_v16;
+
+	uint16_t hitboxsetindex;
+	uint8_t numhitboxsets;
+
+	uint8_t illumpositionattachmentindex;
+
+	Vector3 illumposition;	// illumination center
+
+	Vector3 hull_min;		// ideal movement hull size
+	Vector3 hull_max;
+
+	Vector3 view_bbmin;		// clipping bounding box
+	Vector3 view_bbmax;
+
+	short numbones; // bones
+	uint16_t boneindex;
+	uint16_t bonedataindex;
+
+	short numlocalseq; // sequences
+	uint16_t localseqindex;
+
+	uint8_t unkfill[5];
+
+	uint8_t numlocalattachments;
+	uint16_t localattachmentindex;
+
+	short numlocalnodes;
+	uint16_t localnodenameindex;
+	uint16_t localnodeindex;
+
+	short numikchains;
+	uint16_t ikchainindex;
+
+	short numtextures; // the material limit exceeds 128, probably 256.
+	uint16_t textureindex;
+
+	// replaceable textures tables
+	short numskinref;
+	short numskinfamilies;
+	uint16_t skinindex;
+
+	short numbodyparts;
+	uint16_t bodypartindex;
+
+	// this is rui meshes
+	short numruimeshes;
+	uint16_t ruimeshindex;
+
+	short numlocalposeparameters;
+	uint16_t localposeparamindex;
+
+	uint16_t surfacepropindex;
+
+	uint16_t keyvalueindex;
+
+	uint16_t vgmeshindex;
+	short numvgmeshes;
+
+	short bonetablebynameindex;
+
+	uint16_t boneremapindex;
+	short numboneremaps;
+
+	uint16_t vgloddataindex;
+	short numvgloddata;
+
+	uint16_t vglodheaderindex;
+	short numvglodheader;
+
+	float fadedistance;
+
+	float gathersize; // what. from r5r struct
+
+	short numsrcbonetransform;
+	uint16_t srcbonetransformindex;
+
+	// asset bakery strings if it has any
+	uint16_t mayaindex;
+
+	uint16_t linearboneindex;
+
+	short m_nBoneFlexDriverCount; // unsure if that's what it is in apex
+	uint16_t m_nBoneFlexDriverIndex;
+	uint16_t unkindexflex;
+
+	short unkcount3; // same as v54
+	uint16_t unkindex3; // same as v54
+
+	uint16_t unkindex4; // same as v54
+
+	uint8_t unk5_v16; // unk4_v54[0]
+	uint8_t unk6_v16; // unk4_v54[1]
+	short unk7_v16; // unk4_v54[2]
+	short unk8_v16;
+	short unk9_v16;
+
+	//uint16 unkshorts[7];
+
+	inline studiohdr_t ToFirstVersion()
+	{
+		studiohdr_t mdlhdr{};
+
+		mdlhdr.id = 0x54534449;
+		mdlhdr.version = 54;
 		mdlhdr.numbones = numbones;
 		mdlhdr.numlocalattachments = numlocalattachments;
 

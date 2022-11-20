@@ -9,19 +9,19 @@
 ### **- Transfers bones from one arig/rmdl to an other arig/rmdl**
 
 ```
-Usage : R5Splinter.exe <source> <target> <options>
+Usage : R5Splinter.exe <source> <target> <source version> <options>
 
 ==============================================
 Usage       : replace
-Example     : R5Splinter.exe ./a.rmdl ./b.rmdl replace
+Example     : R5Splinter.exe ./a.rmdl ./b.rmdl 10 replace
 Description : replaces targets bones with source bones
 ==============================================
 Usage       : move -> <source bone name> <pos vector>
-Example     : Example : R5Splinter.exe ./a.rmdl ./b.rmdl move ja_c_propGun 0 0 20
+Example     : Example : R5Splinter.exe ./a.rmdl ./b.rmdl 10 move ja_c_propGun 0 0 20
 Description : moves the specified bone along with it's children
 ==============================================
 Usage       : movetobone -> <source bone name> <target bone name>
-Example     : Example : R5Splinter.exe ./a.rmdl ./b.rmdl movetobone ja_c_propGun jx_c_origin
+Example     : Example : R5Splinter.exe ./a.rmdl ./b.rmdl 10 movetobone ja_c_propGun jx_c_origin
 Description : moves the source bone along with it's children to target bones location
 ==============================================
 ```

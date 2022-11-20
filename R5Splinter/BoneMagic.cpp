@@ -8,10 +8,21 @@ FILE_Out STUDIOMDLReadBones(BinaryIO& Reader, std::string filename, int version)
 
 	switch (version)
 	{
+	case 121:
+		mdlhdr = Reader.read<studiohdr_t_v121>().ToFirstVersion();
+		break;
+	case 122:
+		mdlhdr = Reader.read<studiohdr_t_v122>().ToFirstVersion();
+		break;
 	case 13:
 		mdlhdr = Reader.read<studiohdr_t_v13>().ToFirstVersion();
 		break;
-
+	case 14:
+		mdlhdr = Reader.read<studiohdr_t_v14>().ToFirstVersion();
+		break;
+	//case 16:
+	//	mdlhdr = Reader.read<studiohdr_t_v14>().ToFirstVersion();
+	//	break;
 	default:
 		mdlhdr = Reader.read<studiohdr_t>();
 		break;
@@ -67,7 +78,9 @@ FILE_Out STUDIOMDLReadBones(BinaryIO& Reader, std::string filename, int version)
 	switch (version)
 	{
 	case 121:
+	case 122:
 	case 13:
+	case 14:
 		bonestructsize = sizeof(mstudiobonev54_t_v121);
 		break;
 	}
