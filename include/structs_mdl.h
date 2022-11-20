@@ -1243,6 +1243,7 @@ struct mstudiobonev54_t_v121
 
 	inline mstudiobonev54_t ToFirstVersion()
 	{
+
 		mstudiobonev54_t data{};
 
 		data.sznameindex = sznameindex;

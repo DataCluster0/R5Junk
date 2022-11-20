@@ -100,7 +100,9 @@ FILE_Out STUDIOMDLReadBones(BinaryIO& Reader, std::string filename, int version)
 			switch (version)
 			{
 			case 121:
+			case 122:
 			case 13:
+			case 14:
 				hdr = Reader.read<mstudiobonev54_t_v121>().ToFirstVersion();
 				break;
 			default:
@@ -278,13 +280,6 @@ void STUDIOMDLWriteBones(BinaryIO& writer, FILE_Out& Source, FILE_Out& Target, b
 
 			uint64_t pos = hdr.boneindex + (i * sizeof(mstudiobonev54_t));
 			writer.seek(pos);
-
-			bone.hdr.flags = bone.flag;
-			bone.hdr.parent = bone.parent;
-			bone.hdr.pos = bone.pos;
-			bone.hdr.quat = bone.quat;
-			bone.hdr.rot = bone.rot;
-			bone.hdr.poseToBone = bone.poseToBone;
 
 			writer.write<mstudiobonev54_t>(bone.hdr);
 		}
