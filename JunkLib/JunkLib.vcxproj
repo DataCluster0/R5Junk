@@ -26,6 +26,7 @@
     <ClInclude Include="..\include\Matrix.h" />
     <ClInclude Include="..\include\Quaternion.h" />
     <ClInclude Include="..\include\structs_aseq.h" />
+    <ClInclude Include="..\include\structs_mdl.h" />
     <ClInclude Include="..\include\structs_VG.h" />
     <ClInclude Include="..\include\Utils.h" />
     <ClInclude Include="..\include\Vector2.h" />

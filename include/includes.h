@@ -81,3 +81,4 @@ struct matrix3x4_t
 
 #include <structs_VG.h>
 #include <structs_aseq.h>
+#include <structs_mdl.h>

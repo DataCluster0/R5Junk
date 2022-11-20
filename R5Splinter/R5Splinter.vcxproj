@@ -138,7 +138,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BoneMagic.h" />
-    <ClInclude Include="structs.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\JunkLib\JunkLib.vcxproj">

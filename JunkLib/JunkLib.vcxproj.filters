@@ -54,6 +54,9 @@
     <ClInclude Include="..\include\structs_aseq.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\structs_mdl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\include\Utils.cpp">

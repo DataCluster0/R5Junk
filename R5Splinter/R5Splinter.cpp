@@ -1,4 +1,3 @@
-#include "structs.h"
 #include "BoneMagic.h"
 
 using namespace std::filesystem;
@@ -7,23 +6,23 @@ int main(int argc, char* argv[]) {
 	if (argc < 2)
 	{
 		printf("\n==============================================\n");
-		printf("$ Usage : R5Splinter.exe <source> <target> <options>\n");
+		printf("$ Usage : R5Splinter.exe <source> <target> <source version> <options>\n");
 		printf("==============================================\n\n");
 
 		printf("$ Usage       : replace\n");
-		printf("# Example     : R5Splinter.exe ./a.rmdl ./b.rmdl replace\n");
+		printf("# Example     : R5Splinter.exe ./a.rmdl ./b.rmdl 10  replace\n");
 		printf("? Description : replaces targets bones with source bones\n\n");
 
 		printf("==============================================\n\n");
 
 		printf("$ Usage       : move -> <source bone name> <pos vector>\n");
-		printf("# Example     : Example : R5Splinter.exe ./a.rmdl ./b.rmdl move ja_c_propGun 0 0 20\n");
+		printf("# Example     : Example : R5Splinter.exe ./a.rmdl ./b.rmdl 10 move ja_c_propGun 0 0 20\n");
 		printf("? Description : moves the specified bone along with it's children\n\n");
 
 		printf("==============================================\n\n");
 
 		printf("$ Usage       : movetobone -> <source bone name> <target bone name>\n");
-		printf("# Example     : Example : R5Splinter.exe ./a.rmdl ./b.rmdl movetobone ja_c_propGun jx_c_origin\n");
+		printf("# Example     : Example : R5Splinter.exe ./a.rmdl ./b.rmdl 10 movetobone ja_c_propGun jx_c_origin\n");
 		printf("? Description : moves the source bone along with it's children to target bones location\n\n");
 
 		printf("==============================================\n\n");
@@ -39,12 +38,22 @@ int main(int argc, char* argv[]) {
 
 	if (argc < 4)
 	{
+		printf("Error : version not specified\n");
+		return 0;
+	}
+
+	if (argc < 5)
+	{
 		printf("Error : options not specified\n");
 		return 0;
 	}
 
+	//while (!IsDebuggerPresent())
+	//	::Sleep(100);
+
 	std::string SourceFile = std::string(argv[1]);
 	std::string TargetFile = std::string(argv[2]);
+	int version = stoi(std::string(argv[3]));
 
 	auto sourcefile = std::filesystem::path(SourceFile);
 	std::string SourceFileName = sourcefile.filename().string();
@@ -64,14 +73,14 @@ int main(int argc, char* argv[]) {
 		return 0;
 	}
 
-	std::string option = std::string(argv[3]);
+	std::string option = std::string(argv[4]);
 
 	size_t SourceInputSize = Utils::GetFileSize(SourceFile);
 
 	BinaryIO SourceReader;
 	SourceReader.open(SourceFile, BinaryIOMode::Read);
 	// read bone data
-	FILE_Out SourceBoneData = STUDIOMDLReadBones(SourceReader, SourceFileName);
+	FILE_Out SourceBoneData = STUDIOMDLReadBones(SourceReader, SourceFileName, version);
 
 	size_t TargetInputSize = Utils::GetFileSize(TargetFile);
 	char* pDataBuf = new char[TargetInputSize];
@@ -80,7 +89,7 @@ int main(int argc, char* argv[]) {
 	TargetReader.open(TargetFile, BinaryIOMode::Read);
 	TargetReader.getReader()->read(pDataBuf, TargetInputSize);
 	TargetReader.seek(0);
-	FILE_Out TargetBoneData = STUDIOMDLReadBones(TargetReader, TargetFileName);
+	FILE_Out TargetBoneData = STUDIOMDLReadBones(TargetReader, TargetFileName, 10);
 
 	bool linear = true;
 

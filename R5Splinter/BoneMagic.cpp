@@ -1,10 +1,21 @@
 #include "BoneMagic.h"
 
-FILE_Out STUDIOMDLReadBones(BinaryIO& Reader, std::string filename)
+FILE_Out STUDIOMDLReadBones(BinaryIO& Reader, std::string filename, int version)
 {
 	FILE_Out DataOut{};
 
-	studiohdr_t mdlhdr = Reader.read<studiohdr_t>();
+	studiohdr_t mdlhdr{};
+
+	switch (version)
+	{
+	case 13:
+		mdlhdr = Reader.read<studiohdr_t_v13>().ToFirstVersion();
+		break;
+
+	default:
+		mdlhdr = Reader.read<studiohdr_t>();
+		break;
+	}
 
 	if (mdlhdr.id != 0x54534449) // "IDST"
 	{
@@ -51,6 +62,16 @@ FILE_Out STUDIOMDLReadBones(BinaryIO& Reader, std::string filename)
 		}
 	}
 
+	int bonestructsize = sizeof(mstudiobonev54_t);
+
+	switch (version)
+	{
+	case 121:
+	case 13:
+		bonestructsize = sizeof(mstudiobonev54_t_v121);
+		break;
+	}
+
 	// read bones
 	if (mdlhdr.boneindex)
 	{
@@ -58,10 +79,22 @@ FILE_Out STUDIOMDLReadBones(BinaryIO& Reader, std::string filename)
 		{
 			auto& bone = BoneData[i];
 
-			uint64_t pos = mdlhdr.boneindex + (i * sizeof(mstudiobonev54_t));
+			uint64_t pos = mdlhdr.boneindex + (i * bonestructsize);
 			Reader.seek(pos);
 
-			mstudiobonev54_t hdr = Reader.read<mstudiobonev54_t>();
+			mstudiobonev54_t hdr{};
+			
+			switch (version)
+			{
+			case 121:
+			case 13:
+				hdr = Reader.read<mstudiobonev54_t_v121>().ToFirstVersion();
+				break;
+			default:
+				hdr = Reader.read<mstudiobonev54_t>();
+				break;
+			}
+
 			bone.hdr = hdr;
 
 			uint64_t stringpos = pos + hdr.sznameindex;
@@ -87,7 +120,7 @@ FILE_Out STUDIOMDLReadBones(BinaryIO& Reader, std::string filename)
 
 		if (jigglebonecount)
 		{
-			Reader.seek(mdlhdr.boneindex + (BoneData.size() * sizeof(mstudiobonev54_t)));
+			Reader.seek(mdlhdr.boneindex + (BoneData.size() * bonestructsize));
 
 			for (int i = 0; i < jigglebonecount; i++)
 				DataOut.JiggleList.push_back(Reader.read<mstudiojigglebonev54_t>());
@@ -151,6 +184,56 @@ FILE_Out STUDIOMDLReadBones(BinaryIO& Reader, std::string filename)
 			file.Activity = Reader.readString();
 
 			DataOut.seqlist.push_back(file);
+		}
+	}
+
+	// read nodes
+	if (mdlhdr.localnodenameindex && mdlhdr.numlocalnodes)
+	{
+		for (int i = 0; i < mdlhdr.numlocalnodes; i++)
+		{
+			FILE_NODE file{};
+
+			Reader.seek(mdlhdr.localnodenameindex + (i * sizeof(mstudionodename_t)));
+			int Index = Reader.read<int>();
+
+			Reader.seek(Index);
+
+			file.Name = Reader.readString();
+
+			DataOut.NodeList.push_back(file);
+		}
+
+		Reader.seek(mdlhdr.localnodenameindex + (mdlhdr.numlocalnodes * sizeof(mstudionodename_t)));
+
+		// read index
+		for (auto& node : DataOut.NodeList)
+			node.DataIndex = Reader.read<int>();
+
+		// read node data
+		for (auto& node : DataOut.NodeList)
+		{
+			Reader.seek(node.DataIndex);
+			node.Data = Reader.read<mstudionodedata_t>();
+		}
+	}
+
+	// read poseparams
+	if (mdlhdr.localposeparamindex && mdlhdr.numlocalposeparameters)
+	{
+		for (int i = 0; i < mdlhdr.numlocalposeparameters; i++)
+		{
+			FILE_POSEPARAMS file{};
+
+			Reader.seek(mdlhdr.localposeparamindex + (i * sizeof(mstudioposeparamdesc_t)));
+			uint64_t pos = Reader.tell();
+
+			file.hdr = Reader.read<mstudioposeparamdesc_t>();
+
+			Reader.seek(pos + file.hdr.sznameindex);
+			file.Name = Reader.readString();
+
+			DataOut.PoseParamList.push_back(file);
 		}
 	}
 
@@ -220,8 +303,8 @@ void STUDIOMDLWriteBones(BinaryIO& writer, FILE_Out& Source, FILE_Out& Target, b
 			uint64_t pos = hdr.boneindex + (i * sizeof(mstudiobonev54_t));
 			writer.seek(pos);
 
-			uint64_t size = (bonedata.size() * sizeof(mstudiobonev54_t)) + (Source.JiggleList.size() * sizeof(mstudiojigglebonev54_t)) + 
-				            (Source.JiggleDataIndexes.size() * sizeof(uint8_t)) + (Source.JiggleData.size() * sizeof(uint8_t));
+			uint64_t size = (bonedata.size() * sizeof(mstudiobonev54_t)) + (Source.JiggleList.size() * sizeof(mstudiojigglebonev54_t)) +
+				(Source.JiggleDataIndexes.size() * sizeof(uint8_t)) + (Source.JiggleData.size() * sizeof(uint8_t));
 
 			uint64_t stringoffset = hdr.boneindex + size + nameoffset;
 
@@ -261,6 +344,79 @@ void STUDIOMDLWriteBones(BinaryIO& writer, FILE_Out& Source, FILE_Out& Target, b
 
 				nameoffset += attachment.Name.length() + 1;
 			}
+		}
+
+		// read nodes
+		if (Source.NodeList.size() > 0)
+		{
+			auto& Data = Source.NodeList;
+
+			hdr.numlocalnodes = Data.size();
+			hdr.localnodenameindex = writer.tell();
+
+			uint64_t offset = 0;
+			for (int i = 0; i < Data.size(); i++)
+			{
+				FILE_NODE& Node = Data[i];
+
+				uint64_t pos = hdr.localnodenameindex + (i * sizeof(int));
+
+				writer.seek(pos);
+
+				mstudionodename_t Out{};
+
+				Out.sznameindex = hdr.localnodenameindex + (hdr.numlocalnodes * (sizeof(mstudionodename_t) + sizeof(int) + sizeof(mstudionodedata_t))) + offset;
+
+				writer.write<mstudionodename_t>(Out);
+
+				offset += Node.Name.length() + 1;
+			}
+
+			writer.seek(hdr.localnodenameindex + (Data.size() * sizeof(mstudionodename_t)));
+
+			for (int i = 0; i < Data.size(); i++)
+			{
+				FILE_NODE& Node = Data[i];
+
+				int pos = (hdr.numlocalnodes * (sizeof(mstudionodename_t) + sizeof(int))) + (i * sizeof(mstudionodedata_t));
+				writer.write<int>(pos);
+			}
+
+			for (auto& Node : Data)
+				writer.write<mstudionodedata_t>(Node.Data);
+
+			for (auto& Node : Data)
+				writer.writeString(Node.Name);
+		}
+
+		// write poseparams
+		if (Source.PoseParamList.size() > 0)
+		{
+			auto& Data = Source.PoseParamList;
+
+			hdr.numlocalposeparameters = Data.size();
+			hdr.localposeparamindex = writer.tell();
+
+			uint64_t offset = 0;
+			for (int i = 0; i < Data.size(); i++)
+			{
+				FILE_POSEPARAMS& Pose = Data[i];
+
+				uint64_t pos = hdr.localposeparamindex + (i * sizeof(mstudioposeparamdesc_t));
+
+				writer.seek(pos);
+
+				Pose.hdr.sznameindex = (hdr.localposeparamindex + (Data.size() * sizeof(mstudioposeparamdesc_t)) + offset) - pos;
+
+				writer.write<mstudioposeparamdesc_t>(Pose.hdr);
+
+				offset += Pose.Name.length() + 1;
+			}
+
+			writer.seek(hdr.localposeparamindex + (Data.size() * sizeof(mstudioposeparamdesc_t)));
+
+			for (auto& pose : Data)
+				writer.writeString(pose.Name);
 		}
 
 		hdr.bonetablebynameindex = writer.tell();
