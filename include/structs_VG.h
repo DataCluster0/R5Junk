@@ -64,6 +64,7 @@ struct PackedPosition
 		value = packPosition(o + pos).value;
 	}
 
+
 	inline void RotatePosition(Vector3 rot)
 	{
 		Vector3 o = UnpackPosition();
@@ -78,6 +79,13 @@ struct PackedPosition
 			o.Rotate(Vector3(0, 0, 1), MathHelper::DegreesToRadians(rot.Z));
 
 		value = packPosition(o).value;
+	}
+
+	inline void ScalePosition(float scale)
+	{
+		Vector3 o = UnpackPosition();
+
+		value = packPosition(o * scale).value;
 	}
 };
 
@@ -444,7 +452,7 @@ struct PackedNormal
 	inline void RotateNormal(Vector3 rot)
 	{
 		Vector3 o = UnpackNormal();
-		Vector3 Tangent = UnpackTangent(o);
+		//Vector3 Tangent = UnpackTangent(o);
 
 		if (rot.X != 0)
 			o.Rotate(Vector3(1, 0, 0), MathHelper::DegreesToRadians(rot.X));
@@ -455,9 +463,14 @@ struct PackedNormal
 		if (rot.Z != 0)
 			o.Rotate(Vector3(0, 0, 1), MathHelper::DegreesToRadians(rot.Z));
 
-		o.Normalize();
-
 		Value = packNormal(o).Value;
+	}
+
+	inline void ScaleNormal(float scale)
+	{
+		//Vector3 Tangent = UnpackTangent(o);
+
+		Value = packNormal(UnpackNormal() * scale).Value;
 	}
 };
 

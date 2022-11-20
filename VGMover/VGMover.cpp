@@ -9,7 +9,7 @@ struct VGMeshData
 	std::vector<VTX> vtxlist{};
 };
 
-std::vector<VGMeshData> ReadVGMeshData(BinaryIO& Reader, VGHeader& hdr, Vector3 NewPosition, Vector3 NewRot)
+std::vector<VGMeshData> ReadVGMeshData(BinaryIO& Reader, VGHeader& hdr, Vector3 NewPosition, Vector3 NewRot, float NewScale)
 {
 	VGHeader h = Reader.read<VGHeader>();
 
@@ -49,12 +49,18 @@ std::vector<VGMeshData> ReadVGMeshData(BinaryIO& Reader, VGHeader& hdr, Vector3 
 				vtx.Pos += NewPosition;
 			else if (m.flags & VG_PACKED_POSITION)
 			{
+				if (NewScale != 0.0)
+				{
+					vtx.PKPos.ScalePosition(NewScale);
+					vtx.normal.ScaleNormal(NewScale);
+				}
+
 				if (NewRot != Vector3(0, 0, 0))
 				{
 					vtx.PKPos.RotatePosition(NewRot);
 					vtx.normal.RotateNormal(NewRot);
 				}
-					
+
 				if (NewPosition != Vector3(0, 0, 0))
 					vtx.PKPos.MovePosition(NewPosition);
 			}
@@ -124,11 +130,11 @@ int main(int argc, char* argv[]) {
 	if (argc < 2)
 	{
 		printf("\n==============================================\n");
-		printf("$ Usage : VGMover.exe <source> <pos x y z> <rot x y z>\n");
+		printf("$ Usage : VGMover.exe <source> <pos x y z> <rot x y z> <scale>\n");
 		printf("==============================================\n\n");
 
 		printf("$ Usage       : replace\n");
-		printf("# Example     : VGMover.exe ./a.vg 0 10.0 0 0 180 180\n");
+		printf("# Example     : VGMover.exe ./a.vg 0 10.0 0 0 180 180 0.1\n");
 		printf("? Description : Moves the vg vertex positions\n\n");
 
 		printf("==============================================\n\n");
@@ -150,6 +156,8 @@ int main(int argc, char* argv[]) {
 	Vector3 NewPos{};
 
 	Vector3 NewRot{};
+
+	float NewScale{};
 
 	// pos
 	if (argc >= 5)
@@ -176,6 +184,13 @@ int main(int argc, char* argv[]) {
 		NewRot = { x,y,z };
 	}
 
+	// scale
+	if (argc >= 9)
+	{
+		float scale = ::atof(std::string(argv[8]).c_str());
+
+		NewScale = scale;
+	}
 
 	size_t SourceInputSize = Utils::GetFileSize(SourceFile);
 	char* pDataBuf = new char[SourceInputSize];
@@ -187,7 +202,7 @@ int main(int argc, char* argv[]) {
 
 	VGHeader h{};
 
-	std::vector<VGMeshData> MeshData = ReadVGMeshData(SourceReader, h, NewPos, NewRot);
+	std::vector<VGMeshData> MeshData = ReadVGMeshData(SourceReader, h, NewPos, NewRot, NewScale);
 
 	BinaryIO writer;
 

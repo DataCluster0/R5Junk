@@ -31,11 +31,11 @@ Description : moves the source bone along with it's children to target bones loc
 ### **- Moves VG Verts**
 
 ```
-Usage : VGMover.exe <source> <pos x y z> <rot x y z>
+Usage : VGMover.exe <source> <pos x y z> <rot x y z> <scale>
 
 ==============================================
 Usage       : replace
-Example     : VGMover.exe ./a.vg 0 10.0 0 0 180 180
+Example     : VGMover.exe ./a.vg 0 10.0 0 0 180 180 0.8
 Description : Moves the vg vertex positions
 ==============================================
 ```
