@@ -64,24 +64,18 @@ struct PackedPosition
 		value = packPosition(o + pos).value;
 	}
 
-
 	inline void RotatePosition(Vector3 rot)
 	{
 		Vector3 o = UnpackPosition();
 
-		if (rot.X != 0)
-			o.Rotate(Vector3(1, 0, 0), MathHelper::DegreesToRadians(rot.X));
-
-		if (rot.Y != 0)
-			o.Rotate(Vector3(0, 1, 0), MathHelper::DegreesToRadians(rot.Y));
-
-		if (rot.Z != 0)
-			o.Rotate(Vector3(0, 0, 1), MathHelper::DegreesToRadians(rot.Z));
+		o.Rotate(Vector3(1, 0, 0), MathHelper::DegreesToRadians(rot.X));
+		o.Rotate(Vector3(0, 1, 0), MathHelper::DegreesToRadians(rot.Y));
+		o.Rotate(Vector3(0, 0, 1), MathHelper::DegreesToRadians(rot.Z));
 
 		value = packPosition(o).value;
 	}
 
-	inline void ScalePosition(float scale)
+	inline void ScalePosition(Vector3 scale)
 	{
 		Vector3 o = UnpackPosition();
 
@@ -454,19 +448,14 @@ struct PackedNormal
 		Vector3 o = UnpackNormal();
 		//Vector3 Tangent = UnpackTangent(o);
 
-		if (rot.X != 0)
-			o.Rotate(Vector3(1, 0, 0), MathHelper::DegreesToRadians(rot.X));
-
-		if (rot.Y != 0)
-			o.Rotate(Vector3(0, 1, 0), MathHelper::DegreesToRadians(rot.Y));
-
-		if (rot.Z != 0)
-			o.Rotate(Vector3(0, 0, 1), MathHelper::DegreesToRadians(rot.Z));
+		o.Rotate(Vector3(1, 0, 0), MathHelper::DegreesToRadians(rot.X));
+		o.Rotate(Vector3(0, 1, 0), MathHelper::DegreesToRadians(rot.Y));
+		o.Rotate(Vector3(0, 0, 1), MathHelper::DegreesToRadians(rot.Z));
 
 		Value = packNormal(o).Value;
 	}
 
-	inline void ScaleNormal(float scale)
+	inline void ScaleNormal(Vector3 scale)
 	{
 		//Vector3 Tangent = UnpackTangent(o);
 

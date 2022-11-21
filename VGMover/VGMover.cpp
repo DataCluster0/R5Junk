@@ -9,7 +9,7 @@ struct VGMeshData
 	std::vector<VTX> vtxlist{};
 };
 
-std::vector<VGMeshData> ReadVGMeshData(BinaryIO& Reader, VGHeader& hdr, Vector3 NewPosition, Vector3 NewRot, float NewScale)
+std::vector<VGMeshData> ReadVGMeshData(BinaryIO& Reader, VGHeader& hdr, Vector3 NewPosition, Vector3 NewRot, Vector3 NewScale)
 {
 	VGHeader h = Reader.read<VGHeader>();
 
@@ -46,10 +46,13 @@ std::vector<VGMeshData> ReadVGMeshData(BinaryIO& Reader, VGHeader& hdr, Vector3 
 			vtx = VTX::ReadVTX(Reader, m);
 
 			if (m.flags & VG_POSITION)
-				vtx.Pos += NewPosition;
+			{
+				if (NewPosition != Vector3(0, 0, 0))
+					vtx.Pos += NewPosition;
+			}
 			else if (m.flags & VG_PACKED_POSITION)
 			{
-				if (NewScale != 0.0)
+				if (NewScale != Vector3(0, 0, 0))
 				{
 					vtx.PKPos.ScalePosition(NewScale);
 					vtx.normal.ScaleNormal(NewScale);
@@ -130,7 +133,7 @@ int main(int argc, char* argv[]) {
 	if (argc < 2)
 	{
 		printf("\n==============================================\n");
-		printf("$ Usage : VGMover.exe <source> <pos x y z> <rot x y z> <scale>\n");
+		printf("$ Usage : VGMover.exe <source> <pos x y z> <rot x y z> <scale> or <scale x y z>\n");
 		printf("==============================================\n\n");
 
 		printf("$ Usage       : replace\n");
@@ -157,7 +160,7 @@ int main(int argc, char* argv[]) {
 
 	Vector3 NewRot{};
 
-	float NewScale{};
+	Vector3 NewScale{};
 
 	// pos
 	if (argc >= 5)
@@ -185,11 +188,18 @@ int main(int argc, char* argv[]) {
 	}
 
 	// scale
-	if (argc >= 9)
+	if (argc >= 11)
+	{
+		float x = ::atof(std::string(argv[8]).c_str());
+		float y = ::atof(std::string(argv[9]).c_str());
+		float z = ::atof(std::string(argv[10]).c_str());
+
+		NewScale = { x, y, z };
+	} else if (argc >= 9)
 	{
 		float scale = ::atof(std::string(argv[8]).c_str());
 
-		NewScale = scale;
+		NewScale = { scale, scale, scale };;
 	}
 
 	size_t SourceInputSize = Utils::GetFileSize(SourceFile);

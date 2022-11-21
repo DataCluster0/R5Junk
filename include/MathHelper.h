@@ -10,7 +10,7 @@ namespace Math
 		// Converts the input degrees to radian units
 		constexpr static float DegreesToRadians(float Value)
 		{
-			return (float)((Value * MathHelper::PI) / 180.0f);
+			return Value * (MathHelper::PI / 180.0f);
 		}
 		// Converts the input radians to degree units
 		constexpr static float RadiansToDegrees(float Value)
