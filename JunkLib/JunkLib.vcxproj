@@ -22,6 +22,7 @@
     <ClCompile Include="Half.cpp" />
     <ClCompile Include="Matrix.cpp" />
     <ClCompile Include="Quaternion.cpp" />
+    <ClCompile Include="SEAnim.cpp" />
     <ClCompile Include="Utils.cpp" />
     <ClCompile Include="Vector2.cpp" />
     <ClCompile Include="Vector3.cpp" />
@@ -34,6 +35,7 @@
     <ClInclude Include="include\Matrix.h" />
     <ClInclude Include="include\Quaternion.h" />
     <ClInclude Include="include\RapidJson\rapidjson.h" />
+    <ClInclude Include="include\SEAnim.h" />
     <ClInclude Include="include\structs_aseq.h" />
     <ClInclude Include="include\structs_mdl.h" />
     <ClInclude Include="include\structs_VG.h" />

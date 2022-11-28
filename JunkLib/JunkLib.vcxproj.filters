@@ -39,6 +39,9 @@
     <ClCompile Include="Utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SEAnim.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\structs_aseq.h">
@@ -78,6 +81,9 @@
       <Filter>Header Files\Math</Filter>
     </ClInclude>
     <ClInclude Include="include\RapidJson\rapidjson.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SEAnim.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
