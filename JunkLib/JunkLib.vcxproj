@@ -33,6 +33,7 @@
     <ClInclude Include="include\MathHelper.h" />
     <ClInclude Include="include\Matrix.h" />
     <ClInclude Include="include\Quaternion.h" />
+    <ClInclude Include="include\RapidJson\rapidjson.h" />
     <ClInclude Include="include\structs_aseq.h" />
     <ClInclude Include="include\structs_mdl.h" />
     <ClInclude Include="include\structs_VG.h" />

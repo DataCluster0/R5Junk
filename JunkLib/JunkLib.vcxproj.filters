@@ -77,5 +77,8 @@
     <ClInclude Include="include\Vector3.h">
       <Filter>Header Files\Math</Filter>
     </ClInclude>
+    <ClInclude Include="include\RapidJson\rapidjson.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

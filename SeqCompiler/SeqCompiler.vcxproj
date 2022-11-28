@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{ab8d390b-68be-4d60-8b2b-3e95a42c8171}</ProjectGuid>
-    <RootNamespace>R5VGOld</RootNamespace>
+    <ProjectGuid>{daa437fb-b579-4d31-bed0-39ff78f30621}</ProjectGuid>
+    <RootNamespace>SeqCompiler</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -133,17 +133,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="R5VGOld.cpp" />
-    <ClCompile Include="VGMagic.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\JunkLib\JunkLib.vcxproj">
-      <Project>{b64c0420-f889-44d5-953c-6c1b6e948244}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\include\includes.h" />
-    <ClInclude Include="VGMagic.h" />
+    <ClCompile Include="SeqCompiler.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
