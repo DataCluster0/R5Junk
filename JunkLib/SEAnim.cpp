@@ -106,12 +106,9 @@ std::vector<SEAnimBone_o> ReadSEAnim(BinaryIO& reader)
 
 		if (framedata.poslist.size())
 		{
-			for (int j = 0; framedata.poslist.size(); j++)
+			for (int i = 0; i < framedata.poslist.size(); i++)
 			{
-				if (j >= framedata.poslist.size())
-					break;
-
-				auto& frame = framedata.poslist[j];
+				auto& frame = framedata.poslist[i];
 
  				Frames[frame.frame].pos = frame.pos;
 			}
@@ -119,12 +116,9 @@ std::vector<SEAnimBone_o> ReadSEAnim(BinaryIO& reader)
 
 		if (framedata.rotlist.size())
 		{
-			for (int j = 0; framedata.rotlist.size(); j++)
+			for (int i = 0; i < framedata.rotlist.size(); i++)
 			{
-				if (j >= framedata.rotlist.size())
-					break;
-
-				auto& frame = framedata.rotlist[j];
+				auto& frame = framedata.rotlist[i];
 
 				Frames[frame.frame].rot = frame.rot;
 			}
@@ -132,12 +126,9 @@ std::vector<SEAnimBone_o> ReadSEAnim(BinaryIO& reader)
 
 		if (framedata.scalelist.size())
 		{
-			for (int j = 0; framedata.scalelist.size(); j++)
+			for (int i = 0; i < framedata.scalelist.size(); i++)
 			{
-				if (j >= framedata.scalelist.size())
-					break;
-
-				auto& frame = framedata.scalelist[j];
+				auto& frame = framedata.scalelist[i];
 
 				Frames[frame.frame].scale = frame.scale;
 			}
