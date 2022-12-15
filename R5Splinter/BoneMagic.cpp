@@ -112,6 +112,15 @@ FILE_Out STUDIOMDLReadBones(BinaryIO& Reader, std::string filename, int version)
 
 			bone.hdr = hdr;
 
+			bone.parent = hdr.parent;
+
+			bone.flag = hdr.flags;
+			bone.pos = hdr.pos;
+			bone.quat = hdr.quat;
+			bone.rot = hdr.rot;
+
+			bone.poseToBone = hdr.poseToBone;
+			
 			uint64_t stringpos = pos + hdr.sznameindex;
 
 			Reader.seek(stringpos);
@@ -156,31 +165,31 @@ FILE_Out STUDIOMDLReadBones(BinaryIO& Reader, std::string filename, int version)
 	for (auto& bone : DataOut.BoneNameTable)
 		bone = Reader.read<mstudiobonenametable_t>();
 
-	if (mdlhdr.linearboneindex)
-	{
-		Reader.seek(mdlhdr.linearboneindex);
-		mstudiolinearbonev54_t lbonehdr = Reader.read<mstudiolinearbonev54_t>();
-		uint64_t lbonehdroffset = 0;
-
-		// read linear data
-		for (auto& bone : BoneData)
-			bone.flag = Reader.read<uint32_t>();
-
-		for (auto& bone : BoneData)
-			bone.parent = Reader.read<uint32_t>();
-
-		for (auto& bone : BoneData)
-			bone.pos = Reader.read<Vector3>();
-
-		for (auto& bone : BoneData)
-			bone.quat = Reader.read<Quaternion>();
-
-		for (auto& bone : BoneData)
-			bone.rot = Reader.read<RadianEuler>();
-
-		for (auto& bone : BoneData)
-			bone.poseToBone = Reader.read<matrix3x4_t>();
-	}
+	//if (mdlhdr.linearboneindex)
+	//{
+	//	Reader.seek(mdlhdr.linearboneindex);
+	//	mstudiolinearbonev54_t lbonehdr = Reader.read<mstudiolinearbonev54_t>();
+	//	uint64_t lbonehdroffset = 0;
+	//
+	//	// read linear data
+	//	for (auto& bone : BoneData)
+	//		bone.flag = Reader.read<uint32_t>();
+	//
+	//	for (auto& bone : BoneData)
+	//		bone.parent = Reader.read<uint32_t>();
+	//
+	//	for (auto& bone : BoneData)
+	//		bone.pos = Reader.read<Vector3>();
+	//
+	//	for (auto& bone : BoneData)
+	//		bone.quat = Reader.read<Quaternion>();
+	//
+	//	for (auto& bone : BoneData)
+	//		bone.rot = Reader.read<RadianEuler>();
+	//
+	//	for (auto& bone : BoneData)
+	//		bone.poseToBone = Reader.read<matrix3x4_t>();
+	//}
 
 	if (mdlhdr.localseqindex && mdlhdr.numlocalseq)
 	{
