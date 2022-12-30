@@ -203,4 +203,4 @@ int GetBoneTSize(int bonecount);
 
 uint32_t ReadBoneT(BinaryIO& reader, int bonecount);
 
-SEAnimOut_t ReadSEAnim(BinaryIO& reader);
+std::vector<SEAnimBone_o> ReadSEAnim(BinaryIO& reader);

@@ -100,7 +100,7 @@ std::vector<SEAnimBone_o> ReadSEAnim(BinaryIO& reader)
 
 		auto& framedata = BoneData[i];
 
-		bone.flags = framedata.flags;
+		//bone.flags = framedata.flags;
 
 		std::vector<SEAnimBoneFrame_o> Frames(h.frameCount);
 
