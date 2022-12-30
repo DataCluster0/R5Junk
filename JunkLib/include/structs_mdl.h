@@ -1540,6 +1540,7 @@ struct FILE_Out
 	{
 		if (parentboneid > BoneData.size())
 			return;
+				
 
 		std::vector<FILE_BONE> ChildBones = GetChildBones(parentboneid);
 
@@ -1548,5 +1549,6 @@ struct FILE_Out
 
 		for (auto& bone : ChildBones)
 			bone.pos += offset;
+			
 	}
 };

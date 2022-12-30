@@ -99,16 +99,16 @@ int main(int argc, char* argv[]) {
 
 	if (option == "move")
 	{
-		std::string bonename = std::string(argv[4]);
+		std::string bonename = std::string(argv[5]);
 		int bone = SourceBoneData.FindBoneByName(bonename);
 
 		if (bone != -1)
 		{
-			if (argc == 8)
+			if (argc >= 9)
 			{
-				float x = ::atof(std::string(argv[5]).c_str());
-				float y = ::atof(std::string(argv[6]).c_str());
-				float z = ::atof(std::string(argv[7]).c_str());
+				float x = ::atof(std::string(argv[6]).c_str());
+				float y = ::atof(std::string(argv[7]).c_str());
+				float z = ::atof(std::string(argv[8]).c_str());
 
 				printf("Moving %s : %6.4lf, %6.4lf, %6.4lf\n", bonename.c_str(), x, y, z);
 
@@ -138,7 +138,7 @@ int main(int argc, char* argv[]) {
 
 		if (sourcebone != -1 && targetbone != -1)
 		{
-			if (argc == 6)
+			if (argc >= 6)
 			{
 				Vector3 Source = SourceBoneData.GetPosById(sourcebone);
 				Vector3 Target = TargetBoneData.GetPosById(targetbone);

@@ -244,4 +244,6 @@ namespace Math
 	{
 		return Quaternion();
 	}
+
+
 }

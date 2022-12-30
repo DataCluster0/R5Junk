@@ -56,6 +56,9 @@ namespace Math
 		// Inequality operator
 		bool operator!=(const Vector2& Rhs) const;
 
+		static Vector2 Min(const Vector2& a, const Vector2& b);
+		static Vector2 Max(const Vector2& a, const Vector2& b);
+
 		// Unary operator
 		Vector2 operator-() const;
 

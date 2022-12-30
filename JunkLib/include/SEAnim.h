@@ -164,13 +164,43 @@ struct SEAnimBone_o
 {
 	std::string Name = "";
 
-	int flags = 0;
+	animflagarrayv54_t flags{};
 
 	std::vector<SEAnimBoneFrame_o> Frames{};
+};
+
+struct SEAnimOut_t
+{
+	float fps = 30.0;
+
+	std::vector<SEAnimBone_o> Frames{};
+
+	inline int GetFrameCount()
+	{
+		Vector3 lastpos{};
+		Quaternion lastrot{};
+		Vector3 lastscale{};
+		int i = 0;
+		for (auto& bone : Frames)
+		{
+			for (auto& frame : bone.Frames)
+			{
+				if (lastpos != frame.pos || lastrot != frame.rot || lastscale != frame.scale)
+				{
+					lastpos = frame.pos;
+					lastrot = frame.rot;
+					lastscale = frame.scale;
+					i++;
+				}
+			}
+		}
+
+		return i - 1;
+	}
 };
 
 int GetBoneTSize(int bonecount);
 
 uint32_t ReadBoneT(BinaryIO& reader, int bonecount);
 
-std::vector<SEAnimBone_o> ReadSEAnim(BinaryIO& reader);
+SEAnimOut_t ReadSEAnim(BinaryIO& reader);

@@ -136,9 +136,6 @@
     <ClCompile Include="VGMover.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\includes.h" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\JunkLib\JunkLib.vcxproj">
       <Project>{b64c0420-f889-44d5-953c-6c1b6e948244}</Project>
     </ProjectReference>

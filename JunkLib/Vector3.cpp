@@ -150,6 +150,60 @@ namespace Math
 		return Vector3(-X, -Y, -Z);
 	}
 
+	Vector3 Vector3::Min(const Vector3& a, const Vector3& b)
+	{
+		return {
+		   Vector3::MinFloat(a.X, b.X),
+		   Vector3::MinFloat(a.Y, b.Y),
+		   Vector3::MinFloat(a.Z, b.Z)
+		};
+	}
+
+	Vector3 Vector3::Max(const Vector3& a, const Vector3& b)
+	{
+		return {
+		   Vector3::MaxFloat(a.X, b.X),
+		   Vector3::MaxFloat(a.Y, b.Y),
+		   Vector3::MaxFloat(a.Z, b.Z)
+		};
+	}
+
+	float Vector3::MinFloat(const float& a, const float& b)
+	{
+		if (a > b)
+			return a;
+		else if (a < b)
+			return b;
+
+		return a;
+	}
+
+	float Vector3::MaxFloat(const float& a, const float& b)
+	{
+		if (a < b)
+			return a;
+		else if (a > b)
+			return b;
+
+		return a;
+	}
+
+	bool Vector3::IsBigger(const Vector3& input)
+	{
+		if (this->Length() > input.Length())
+			return true;
+
+		return false;
+	}
+
+	bool Vector3::IsSmaller(const Vector3& input)
+	{
+		if (this->Length() < input.Length())
+			return true;
+
+		return false;
+	}
+
 	void Vector3::Rotate(Vector3 axis, double theta)
 	{
 		double cosTheta = cos(theta);

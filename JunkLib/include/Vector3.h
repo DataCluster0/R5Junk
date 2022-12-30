@@ -43,6 +43,15 @@ namespace Math
 		Vector3& operator*=(const float Rhs);
 		Vector3& operator/=(const float Rhs);
 
+		static Vector3 Min(const Vector3& a, const Vector3& b);
+		static Vector3 Max(const Vector3& a, const Vector3& b);
+
+		static float MinFloat(const float& a, const float& b);
+		static float MaxFloat(const float& a, const float& b);
+
+		bool IsBigger(const Vector3& input);
+		bool IsSmaller(const Vector3& input);
+
 		// Equality operator
 		bool operator==(const Vector3& Rhs) const;
 		// Inequality operator

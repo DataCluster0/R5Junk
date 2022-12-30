@@ -18,82 +18,85 @@ enum mstudioseqflags : uint32_t
 	STUDIO_EVENT = 0x2000,	// Has been updated at runtime to event index on server
 	STUDIO_WORLD = 0x4000,	// sequence blends in worldspace
 	STUDIO_NOFORCELOOP = 0x8000,	// do not force the animation loop
-	STUDIO_EVENT_CLIENT = 0x10000	// Has been updated at runtime to event index on client
+	STUDIO_EVENT_CLIENT = 0x10000,	// Has been updated at runtime to event index on client
+	STUDIO_ANIMDESC_53_UNK = 0x20000, // actually first in v52
+	STUDIO_ANIMDESC_52_UNK = 0x40000,
+	STUDIO_ANIMDESC_53_UNK1 = 0x80000 // cherry blossom v53, levi in v54
 };
 
 struct mstudioseqdesc_t
 {
-	int baseptr;
+	int baseptr = 0;
 
-	int	szlabelindex;
+	int	szlabelindex = 0;
 
-	int szactivitynameindex;
+	int szactivitynameindex = 0;
 
-	int flags; // looping/non-looping flags
+	int flags = 0; // looping/non-looping flags
 
-	int activity; // initialized at loadtime to game DLL values
-	int actweight;
+	int activity = -1; // initialized at loadtime to game DLL values
+	int actweight = 1;
 
-	int numevents;
-	int eventindex;
+	int numevents = 0;
+	int eventindex = 0;
 
-	Vector3 bbmin; // per sequence bounding box
-	Vector3 bbmax;
+	Vector3 bbmin{}; // per sequence bounding box
+	Vector3 bbmax{};
 
-	int numblends;
+	int numblends = 0;
 
 	// Index into array of shorts which is groupsize[0] x groupsize[1] in length
-	int animindexindex;
+	int animindexindex = 0;
 
 	int movementindex; // [blend] float array for blended movement
-	int groupsize[2];
-	int paramindex[2]; // X, Y, Z, XR, YR, ZR
-	float paramstart[2]; // local (0..1) starting value
-	float paramend[2]; // local (0..1) ending value
-	int paramparent;
+	int2 groupsize{ 1, 1 };
+	int2 paramindex{ -1 , -1 }; // X, Y, Z, XR, YR, ZR
+	Vector2 paramstart{ 0, 0 }; // local (0..1) starting value
+	Vector2 paramend{ 1 , 1 }; // local (0..1) ending value
+	int paramparent = 0;
 
-	float fadeintime; // ideal cross fate in time (0.2 default)
-	float fadeouttime; // ideal cross fade out time (0.2 default)
+	float fadeintime = 0.2; // ideal cross fate in time (0.2 default)
+	float fadeouttime = 0.2; // ideal cross fade out time (0.2 default)
 
-	int localentrynode; // transition node at entry
-	int localexitnode; // transition node at exit
-	int nodeflags; // transition rules
+	int localentrynode = 0; // transition node at entry
+	int localexitnode = 0; // transition node at exit
+	int nodeflags = 0; // transition rules
 
-	float entryphase; // used to match entry gait
-	float exitphase; // used to match exit gait
+	float entryphase = 0; // used to match entry gait
+	float exitphase = 0; // used to match exit gait
 
-	float lastframe; // frame that should generation EndOfSequence
+	float lastframe = 0; // frame that should generation EndOfSequence
 
-	int nextseq; // auto advancing sequences
-	int pose; // index of delta animation between end and nextseq
+	int nextseq = 0; // auto advancing sequences
+	int pose = 0; // index of delta animation between end and nextseq
 
-	int numikrules;
+	int numikrules = 0;
 
-	int numautolayers;
-	int autolayerindex;
+	int numautolayers = 0;
+	int autolayerindex = 0;
 
-	int weightlistindex;
+	int weightlistindex = 0;
 
-	int posekeyindex;
+	int posekeyindex = 0;
 
-	int numiklocks;
-	int iklockindex;
+	int numiklocks = 0;
+	int iklockindex = 0;
 
 	// Key values
-	int keyvalueindex;
-	int keyvaluesize;
+	int keyvalueindex = 0;
+	int keyvaluesize = 0;
 
-	int cycleposeindex; // index of pose parameter to use as cycle index
+	int cycleposeindex = 0; // index of pose parameter to use as cycle index
 
-	int activitymodifierindex;
-	int numactivitymodifiers;
+	int activitymodifierindex = 0;
+	int numactivitymodifiers = 0;
 
-	int unk;
-	int unk1;
+	int unk = 0;
+	int unk1 = 0;
 
-	int unkindex;
+	int unkindex = 0;
 
-	int unk2;
+	int unk2 = 0;
 };
 
 struct mstudioanimdescv54_t
@@ -164,7 +167,7 @@ struct mstudioeventv54_t
 	int type = 0x400; // this will be 0 if old style I'd imagine
 	char options[256];
 
-	int szeventindex;
+	int szeventindex = 0;
 };
 
 // rseq v10
@@ -319,9 +322,9 @@ enum eventtype
 
 struct mstudioactivitymodifierv53_t
 {
-	int sznameindex;
+	int sznameindex = 0;
 
-	int unk; // 0 or 1 observed.
+	int unk = 0; // 0 or 1 observed.
 };
 
 struct animflagarrayv54_t
@@ -362,11 +365,10 @@ struct mstudioanimsectionsv54_t_v121
 	int isExternal; // 0 or 1, if 1 section is not in rseq (I think)
 };
 
-
 struct mstudio_rle_animv54_t
 {
-	uint16_t _tsize : 12; // total size of all animation data, not next offset because even the last one has it
-	uint16_t flags : 4;
+	int16_t size : 12; // total size of all animation data, not next offset because even the last one has it
+	int16_t flags : 4;
 };
 
 #define STUDIO_ANIM_DELTA_54	 0x01 // unverified

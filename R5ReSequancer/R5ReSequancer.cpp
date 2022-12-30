@@ -37,14 +37,14 @@ size_t Read_mstudio_rle_anim_t(BinaryIO& reader, animflagarrayv54_t boneflag)
 			Vector48 rawscale = reader.read<Vector48>();
 	}
 
-	return animv54._tsize;
+	return animv54.size;
 };
 
 int main(int argc, char* argv[]) {
 	for (int i = 0; i < argc; i++)
 	{
 		auto tmpfilepath = std::string((const char*)argv[i]);
-		if (tmpfilepath.find(".rseq") == -1 || tmpfilepath.find(".rseqdata") != -1)
+		if (tmpfilepath.find(".rseq") == -1 || tmpfilepath.find(".SeqData") != -1)
 			continue;
 
 		ASEQ_Out* file = new ASEQ_Out();
@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
 		printf("%s\n", filepath.filename().string().c_str());
 
 		char* pExtDataBuf = nullptr;
-		std::string extdatapath = Utils::ChangeExtension(tmpfilepath, "rseqdata");
+		std::string extdatapath = Utils::ChangeExtension(tmpfilepath, ".SeqData");
 		size_t extinputsize = 0;
 		BinaryIO extreader;
 		if (FILE_EXISTS(extdatapath))
@@ -77,14 +77,14 @@ int main(int argc, char* argv[]) {
 		reader.getReader()->read(pDataBuf, inputsize);
 
 		reader.seek(0, std::ios_base::_Seekbeg);
-
+		
 		auto seqdesc = reader.read<mstudioseqdesc_t>();
 		uint64_t seqdescoffset = reader.tell();
 
 		file->hdr = seqdesc;
 
-		int numanims = seqdesc.groupsize[0] * seqdesc.groupsize[1];
-		int posekeys = seqdesc.groupsize[0] + seqdesc.groupsize[1];
+		int numanims = seqdesc.groupsize.x * seqdesc.groupsize.y;
+		int posekeys = seqdesc.groupsize.x + seqdesc.groupsize.y;
 		int numbones = (seqdesc.activitymodifierindex - seqdesc.weightlistindex) / 4;
 
 		if ((seqdesc.unkindex - seqdesc.animindexindex) < sizeof(mstudioanimdescv54_t_v121))
@@ -153,17 +153,17 @@ int main(int argc, char* argv[]) {
 				{
 					reader.seek(seqdesc.activitymodifierindex + (i * struct_size), std::ios_base::_Seekbeg);
 					uint64_t baseoffset = reader.tell();
-
+			
 					auto activitymodifier = reader.read<mstudioactivitymodifierv53_t>();
-
+			
 					reader.seek(baseoffset + activitymodifier.sznameindex, std::ios_base::_Seekbeg);
 					std::string activityname = reader.readString();
 					int strlen = activityname.length() + 1;
-
+			
 					uint64_t nameoffset = (seqdesc.numactivitymodifiers * struct_size) + str_offset;
 					activitymodifier.sznameindex = nameoffset - (i * struct_size);
 					file->activitymodifiers.push_back({ activitymodifier , activityname });
-
+			
 					str_offset += strlen;
 				}
 			}
@@ -321,9 +321,6 @@ int main(int argc, char* argv[]) {
 			if (IsExternal)
 				printf("%s -> external data detected...\n", filepath.filename().string().c_str());
 
-			if (IsSegmented)
-				printf("%s -> segmented data detected...\n", filepath.filename().string().c_str());
-
 			BinaryIO writer;
 			std::string outpath = filepath.parent_path().string() + "\\downgraded\\";
 
@@ -356,7 +353,6 @@ int main(int argc, char* argv[]) {
 				for (int i = 0; i < file->animdescs.size(); i++)
 				{
 					auto offset = file->blendgroups[i];
-
 					auto animdesc = file->animdescs[i];
 
 					writer.seek(offset + animdesc.desc.ikruleindex, std::ios_base::_Seekbeg);
@@ -366,26 +362,40 @@ int main(int argc, char* argv[]) {
 					if (animdesc.sections.size())
 					{
 						writer.seek(offset + animdesc.desc.sectionindex, std::ios_base::_Seekbeg);
-						for (int i = 0; i < animdesc.sections.size(); i++)
+
+						bool HasExternal = false;
+
+						int realsize = animdesc.sections.size() - 2;
+
+						for (int i = 1; i < animdesc.sections.size(); i++)
 						{
 							auto section = animdesc.sections[i];
-
 							auto oldpos = writer.tell();
-							if (section.isExternal)
-							{
-								auto extanimoffset = inputsize + section.animindex;
 
-								section.animindex = extanimoffset - offset;
-							}
+							if (section.isExternal)
+								section.animindex = (inputsize + section.animindex) - offset;
+
+							if (section.isExternal)
+								HasExternal = true;
 
 							writer.write<int>(section.animindex);
 						}
+
+						// remove null section
+						if (HasExternal)
+							animdesc.desc.numframes = animdesc.desc.sectionframes * (animdesc.sections.size() - 3);
 					}
 
 					writer.seek(offset, std::ios_base::_Seekbeg);
 					writer.write<mstudioanimdescv54_t>(animdesc.desc);
 				}
 			}
+
+			writer.seek(0, std::ios_base::_Seekend);
+			uint64_t offset = writer.tell();
+			writer.writeString(file->szlabel);
+
+			file->hdr.szlabelindex = offset;
 
 			//// write new header data
 			writer.seek(0, std::ios_base::_Seekbeg);

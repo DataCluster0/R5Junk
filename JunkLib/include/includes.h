@@ -79,6 +79,13 @@ struct matrix3x4_t
 	float m20; float m21; float m22; float m23; // r2
 };
 
+struct int2
+{
+	int x;
+	int y;
+};
+
+
 #include <structs_VG.h>
 #include <structs_aseq.h>
 #include <structs_mdl.h>

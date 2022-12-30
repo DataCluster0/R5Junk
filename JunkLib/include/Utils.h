@@ -1,5 +1,13 @@
 #pragma once
 
+void Warning(const char* fmt, ...);
+
+void Error(const char* fmt, ...);
+
+void Log(const char* fmt, ...);
+
+void Debug(const char* fmt, ...);
+
 namespace Utils
 {
 	uintmax_t GetFileSize(std::string filename);
